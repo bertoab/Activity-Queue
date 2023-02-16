@@ -1,5 +1,5 @@
-const inputField = document.getElementById("input-field");
-const modalField = document.getElementById("parameter-index");
+const mainLine = document.getElementById("main-cmd");
+const modalLine = document.getElementById("modal-cmd");
 
 // Generate menu options
 const tempDiv = document.createElement("div");
@@ -8,9 +8,9 @@ const data = [ ["Add task"], ["View history"], ["View archived"]]
 tempDiv.innerHTML = generateTable(cols, data);
 document.getElementsByClassName("main-container")[0].appendChild(tempDiv.firstChild);
 
-inputField.addEventListener("keypress", function(e) { // validate and execute on main function bar input
+mainLine.addEventListener("keypress", function(e) { // validate and execute on main function bar input
   if (e.key === 'Enter') {
-    const index = parseInt(inputField.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
+    const index = parseInt(mainLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
     switch (index) {
       case 1:
         document.getElementById("modal-container").style.display = "flex";
@@ -28,7 +28,7 @@ inputField.addEventListener("keypress", function(e) { // validate and execute on
   }
 });
 
-modalField.addEventListener("keypress", function(e) { // validate and execute on modal function bar input
+modalLine.addEventListener("keypress", function(e) { // validate and execute on modal function bar input
   if (e.key === 'Enter') {
     var index = parseInt(document.getElementById("parameter-index").value); // asserts that we have an integer; TODO: change this into a more tailored validation function
     switch (index) {
