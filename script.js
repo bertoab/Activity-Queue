@@ -2,11 +2,11 @@ const mainLine = document.getElementById("main-cmd");
 const modalLine = document.getElementById("modal-cmd");
 
 // Generate menu options
-const tempDiv = document.createElement("div");
+const tableDiv = document.createElement("div");
 const cols = ["Options"];
 const data = [ ["Add task"], ["View history"], ["View archived"]]
-tempDiv.innerHTML = generateTable(cols, data);
-document.getElementsByClassName("main-container")[0].appendChild(tempDiv.firstChild);
+tableDiv.innerHTML = generateTable(cols, data);
+document.getElementsByClassName("main-container")[0].appendChild(tableDiv.firstChild);
 
 mainLine.addEventListener("keypress", function(e) { // validate and execute on main function bar input
   if (e.key === 'Enter') {
