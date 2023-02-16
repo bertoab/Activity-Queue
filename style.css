@@ -25,11 +25,6 @@ input[type="text"] {
   margin-right: 10px;
 }
 
-button {
-  width: 30%;
-  height: 30px;
-}
-
 #modal-container {
   display: flex;
   justify-content: center;

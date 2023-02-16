@@ -1,5 +1,5 @@
-const selectButton = document.getElementById("select-button");
 const inputField = document.getElementById("input-field");
+const modalField = document.getElementById("parameter-index");
 
 // Generate menu options
 const tempDiv = document.createElement("div");
@@ -8,38 +8,42 @@ const data = [ ["Add task"], ["View history"], ["View archived"]]
 tempDiv.innerHTML = generateTable(cols, data);
 document.getElementsByClassName("main-container")[0].appendChild(tempDiv.firstChild);
 
-selectButton.addEventListener("click", function() { // validate and execute on main function bar input
-  const index = parseInt(inputField.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
-  switch (index) {
-    case 1:
-      document.getElementById("modal-container").style.display = "flex";
-      break;
-    case 2:
-      alert("You selected: View history");
-      break;
-    case 3:
-      alert("You selected: View archived");
-      break;
-    default:
-      alert("Invalid index");
-      break;
+inputField.addEventListener("keypress", function(e) { // validate and execute on main function bar input
+  if (e.key === 'Enter') {
+    const index = parseInt(inputField.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
+    switch (index) {
+      case 1:
+        document.getElementById("modal-container").style.display = "flex";
+        break;
+      case 2:
+        alert("You selected: View history");
+        break;
+      case 3:
+        alert("You selected: View archived");
+        break;
+      default:
+        alert("Invalid index");
+        break;
+    }
   }
 });
 
-document.getElementById("focus-button").addEventListener("click", function() { // validate and execute on modal function bar input
-  var index = parseInt(document.getElementById("parameter-index").value); // asserts that we have an integer; TODO: change this into a more tailored validation function
-  switch (index) {
-    case 1:
-      document.getElementById("name-field").focus();
-      break;
-    case 2:
-      document.getElementById("group-field").focus();
-      break;
-    case 3:
-      document.getElementById("priority-field").focus();
-      break;
-    default:
-      alert("Invalid index");
+modalField.addEventListener("keypress", function(e) { // validate and execute on modal function bar input
+  if (e.key === 'Enter') {
+    var index = parseInt(document.getElementById("parameter-index").value); // asserts that we have an integer; TODO: change this into a more tailored validation function
+    switch (index) {
+      case 1:
+        document.getElementById("name-field").focus();
+        break;
+      case 2:
+        document.getElementById("group-field").focus();
+        break;
+      case 3:
+        document.getElementById("priority-field").focus();
+        break;
+      default:
+        alert("Invalid index");
+    }
   }
 });
 
