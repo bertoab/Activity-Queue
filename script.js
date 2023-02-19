@@ -30,7 +30,7 @@ mainLine.addEventListener("keypress", function(e) { // validate and execute on m
 
 modalLine.addEventListener("keypress", function(e) { // validate and execute on modal function bar input
   if (e.key === 'Enter') {
-    var index = parseInt(document.getElementById("parameter-index").value); // asserts that we have an integer; TODO: change this into a more tailored validation function
+    var index = parseInt(modalLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
     switch (index) {
       case 1:
         document.getElementById("name-field").focus();
