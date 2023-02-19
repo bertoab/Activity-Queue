@@ -72,7 +72,31 @@ function generateTable(cols, data) {
   return tableHTML;
 }
 
-
+// Manage local storage (writing, reading)
+const STORAGE_KEY = "activities";
+/**
+ * Set (or clear) local storage
+ * @param {Array<Object>} activities - Array of activities to save locally. If non-array then an empty array is saved. 
+ */
+function setStore(activities) {
+  if (!Array.isArray(activities)) {
+    localStorage.setItem(STORAGE_KEY, []);
+    return
+  }
+  localStorage.setItem(STORAGE_KEY, activities);
+}
+/**
+ * Read local storage and return it's contents, or empty array if contents corrupted.
+ * @returns {Array<Object>} - Array of activities sorted in order determined by last user-set sort mode.
+ */
+function getStore() {
+  let data = localStorage.getItem(STORAGE_KEY);
+  if (data === null) // uninitialized local storage
+    data = [];
+  if (!Array.isArray(data))
+    throw TypeError("Local storage data is non-array")
+  return data;
+}
 
 // Linked list implementation
 class Node {
