@@ -1,14 +1,16 @@
+// Variables for each function bar input
 const mainLine = document.getElementById("main-cmd");
 const modalLine = document.getElementById("modal-cmd");
 
-// Generate menu options
+// Render main menu options
 const tableDiv = document.createElement("div");
 const cols = ["Options"];
 const data = [ ["Add task"], ["View history"], ["View archived"]]
 tableDiv.innerHTML = generateTable(cols, data);
 document.getElementsByClassName("main-container")[0].appendChild(tableDiv.firstChild);
 
-mainLine.addEventListener("keypress", function(e) { // validate and execute on main function bar input
+// Listener to validate and execute on main function bar input
+mainLine.addEventListener("keypress", function(e) {
   if (e.key === 'Enter') {
     const index = parseInt(mainLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
     switch (index) {
@@ -28,7 +30,8 @@ mainLine.addEventListener("keypress", function(e) { // validate and execute on m
   }
 });
 
-modalLine.addEventListener("keypress", function(e) { // validate and execute on modal function bar input
+// Listener to validate and execute on modal function bar input
+modalLine.addEventListener("keypress", function(e) {
   if (e.key === 'Enter') {
     var index = parseInt(modalLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
     switch (index) {
@@ -47,7 +50,7 @@ modalLine.addEventListener("keypress", function(e) { // validate and execute on 
   }
 });
 
-// a function that generates an indexed-table based on an array of arrays, where the length of the inner arrays correspond to the number of columns for the table (excluding the "Index" column)
+// Generates an HTML string for an indexed-table based on an array of arrays, where the length of the inner arrays correspond to the number of columns for the table (excluding the "Index" column)
 function generateTable(cols, data) {
   let tableHTML = `<table>
     <thead>
@@ -61,7 +64,7 @@ function generateTable(cols, data) {
     <tbody>`;
   for (let i = 0; i < data.length; i++) {
     tableHTML += `<tr>
-        <td>${i + 1}</td>`;
+        <td>${i + 1}</td>`; // write the index into the first column of each data row
     for (let j = 0; j < data[i].length; j++) {
       tableHTML += `<td>${data[i][j]}</td>`;
     }
@@ -105,7 +108,6 @@ class Node {
     this.next = null;
   }
 }
-
 class LinkedList {
   constructor() {
     this.head = null;
