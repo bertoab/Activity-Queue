@@ -5,7 +5,7 @@ const modalLine = document.getElementById("modal-cmd");
 // Render main menu options
 const tableDiv = document.createElement("div");
 const cols = ["Options"];
-const data = [ ["Add task"], ["View history"], ["View archived"]]
+const data = [ ["Add task"], ["View history"], ["View archived"] ];
 tableDiv.innerHTML = generateTable(cols, data);
 document.getElementsByClassName("main-container")[0].appendChild(tableDiv.firstChild);
 
@@ -33,7 +33,7 @@ mainLine.addEventListener("keypress", function(e) {
 // Listener to validate and execute on modal function bar input
 modalLine.addEventListener("keypress", function(e) {
   if (e.key === 'Enter') {
-    var index = parseInt(modalLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
+    const index = parseInt(modalLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
     switch (index) {
       case 1:
         document.getElementById("name-field").focus();
