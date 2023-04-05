@@ -7,7 +7,7 @@ const tableDiv = document.createElement("div");
 const cols = ["Options"];
 const data = [ ["Add task"], ["View history"], ["View archived"] ];
 tableDiv.innerHTML = generateTable(cols, data);
-document.getElementsByClassName("main-container")[0].appendChild(tableDiv.firstChild);
+document.getElementById("main-body").appendChild(tableDiv.firstChild);
 
 // Listener to validate and execute on main function bar input
 mainLine.addEventListener("keypress", function(e) {
