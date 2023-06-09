@@ -1,6 +1,49 @@
-// Variables for each function bar input
-const mainLine = document.getElementById("main-cmd");
-const modalLine = document.getElementById("modal-cmd");
+/**
+ * Creates HTML elements for the FunctionBar component, attaches the appropriate listener to validate and execute on input based on FunctionMapping and ItemMapping parameters, and returns the div HTMLElement.
+ * @param {Object} ItemMapping - the keys must be case-insensitive expected user input strings, and the values must be valid parameters for functions in "FunctionMapping"
+ * @param {Object} FunctionMapping - the keys must be case-insensitive expected user input strings, and the values must be functions with uses relevant to the current state of context
+ */
+const FunctionBar = function(ItemMapping, FunctionMapping) {
+  // Create necessary HTMLElements
+  const div = document.createElement("div");
+  div.classList.add("function-bar");
+  const input = document.createElement("input");
+  input.type = "text";
+  div.appendChild(input);
+
+  // Set up event listener
+  const expectedFunctionInputs = Object.keys(FunctionMapping);
+  //const MaxExpectedFunctionInputLength = Math.max(expectedFunctionInputs.map((str) => str.length));
+  const expectedItemInputs = Object.keys(ItemMapping);
+
+  function searchForMatches(str, expectedInputStringArray) {
+    const matched = [];
+    let searchIndex;
+    str = str.toLowerCase();
+    expectedInputStringArray = expectedInputStringArray.map(expectedInputString => expectedInputString.toLowerCase());
+    expectedInputStringArray.forEach(expectedInput => {
+      searchIndex = str.indexOf(expectedInput);
+      if (searchIndex != -1) {
+        str = str.substring(searchIndex + expectedInput.length);
+        matched.push(expectedInput);
+      }
+    });
+    return [str, matched];
+  }
+
+  input.addEventListener("keypress", function(e) {
+    let userInput = input.value, matchedFunctions, matchedItems;
+    if (e.key === 'Enter') { // validate for a function
+      [userInput, matchedFunctions] = searchForMatches(userInput, expectedFunctionInputs);
+      if (matchedFunctions.length !== 0) {
+        [userInput, matchedItems] = searchForMatches(userInput, expectedItemInputs);
+        FunctionMapping[matchedFunctions[0]](...matchedItems);
+      }
+    }
+  });
+
+  return div;
+}
 
 // Render main menu options
 const tableDiv = document.createElement("div");
@@ -9,46 +52,20 @@ const data = [ ["Add task"], ["View history"], ["View archived"] ];
 tableDiv.innerHTML = generateTable(cols, data);
 document.getElementById("main-body").appendChild(tableDiv.firstChild);
 
-// Listener to validate and execute on main function bar input
-mainLine.addEventListener("keypress", function(e) {
-  if (e.key === 'Enter') {
-    const index = parseInt(mainLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
-    switch (index) {
-      case 1:
-        document.getElementById("modal-container").style.display = "flex";
-        break;
-      case 2:
-        alert("You selected: View history");
-        break;
-      case 3:
-        alert("You selected: View archived");
-        break;
-      default:
-        alert("Invalid index");
-        break;
-    }
-  }
-});
+// Render FunctionBars using function 
+const MainDefaultFunctionMap = {
+  "1": () => document.getElementById("modal-container").style.display = "flex",
+  "2": () => alert("You selected: View history"),
+  "3": () => alert("You selected: View archived")
+};
+document.getElementById("main").appendChild(FunctionBar({}, MainDefaultFunctionMap));
 
-// Listener to validate and execute on modal function bar input
-modalLine.addEventListener("keypress", function(e) {
-  if (e.key === 'Enter') {
-    const index = parseInt(modalLine.value); // asserts that we have an integer; TODO: change this into a more tailored validation function
-    switch (index) {
-      case 1:
-        document.getElementById("name-field").focus();
-        break;
-      case 2:
-        document.getElementById("group-field").focus();
-        break;
-      case 3:
-        document.getElementById("priority-field").focus();
-        break;
-      default:
-        alert("Invalid index");
-    }
-  }
-});
+const ModalDefaultFunctionMap = {
+  "1": () => document.getElementById("name-field").focus(),
+  "2": () => document.getElementById("group-field").focus(),
+  "3": () => document.getElementById("priority-field").focus()
+};
+document.getElementsByClassName("modal")[0].appendChild(FunctionBar({}, ModalDefaultFunctionMap));
 
 // Generates an HTML string for an indexed-table based on an array of arrays, where the length of the inner arrays correspond to the number of columns for the table (excluding the "Index" column)
 function generateTable(cols, data) {
