@@ -70,7 +70,7 @@ const ModalDefaultFunctionMap = {
   "2": () => document.getElementById("group-field").focus(),
   "3": () => document.getElementById("priority-field").focus()
 };
-document.getElementsByClassName("modal")[0].appendChild(FunctionBar(ModalDefaultFunctionMap));
+document.getElementById("modal").appendChild(FunctionBar(ModalDefaultFunctionMap));
 
 // Returns an HTML table element based on an array of arrays, where the length of the inner arrays correspond to the number of columns for the table (excluding the "Index" column)
 function contentTable(cols, data) {

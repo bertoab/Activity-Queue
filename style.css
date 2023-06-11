@@ -1,7 +1,3 @@
-.main-container {
-  padding: 20px;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -37,7 +33,7 @@ input[type="text"] {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal {
+#modal {
   background-color: white;
   border: 1px solid black;
   width: 50%;
