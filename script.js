@@ -4,6 +4,13 @@
  * @param {Object} FunctionMapping - the keys must be case-insensitive expected user input strings, and the values must be functions with uses relevant to the current state of context
  */
 const FunctionBar = function(FunctionMapping, ItemMapping) {
+  // Validate parameters
+  const isObject = (val) => (typeof val === 'object' && !Array.isArray(val));
+  if (!isObject(FunctionMapping))
+    throw new TypeError("FunctionMapping is non-object");
+  if (typeof ItemMapping !== 'undefined' && !isObject(ItemMapping))
+    throw new TypeError("ItemMapping is defined non-object");
+
   // Create necessary HTMLElements
   const div = document.createElement("div");
   div.classList.add("function-bar");
@@ -72,8 +79,14 @@ const ModalDefaultFunctionMap = {
 };
 document.getElementById("modal").appendChild(FunctionBar(ModalDefaultFunctionMap));
 
-// Returns an HTML table element based on an array of arrays, where the length of the inner arrays correspond to the number of columns for the table (excluding the "Index" column)
+/**
+ * Returns an HTML table element based on an array of arrays, where the length of the inner arrays correspond to the number of columns for the table (for a symmetrical, gap-less table)
+ * @param {Array<string>} cols - an array of strings to name the table columns
+ * @param {Array<Array<string>>} data - a 2-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
+ */
 function contentTable(cols, data) {
+  if (!Array.isArray(cols) || !Array.isArray(data))
+    throw new TypeError("One or both arguments are non-array");
   let tableHTML = `<table>
     <thead>
       <tr>`;
@@ -202,4 +215,10 @@ class LinkedList {
     }
     return -1;
   }
+}
+
+// Support module
+if (typeof exports !== 'undefined') {
+  exports.contentTable = contentTable;
+  exports.FunctionBar = FunctionBar;
 }

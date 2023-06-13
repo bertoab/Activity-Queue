@@ -1,0 +1,21 @@
+{
+  "main": "script.test.ts",
+  "scripts": {
+    "start": "python3 -m http.server --directory ./",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bertoab/Activity-Queue.git"
+  },
+  "author": "@bertoab",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bertoab/Activity-Queue/issues"
+  },
+  "homepage": "https://github.com/bertoab/Activity-Queue#readme",
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0"
+  }
+}
