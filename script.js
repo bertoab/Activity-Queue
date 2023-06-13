@@ -55,7 +55,7 @@ const FunctionBar = function(FunctionMapping, ItemMapping) {
 // Render main menu options
 const cols = ["Index", "Options"];
 const data = [ ["Add task"], ["View history"], ["View archived"] ].map((element, index) => [index + 1, element]);
-document.getElementById("main-body").appendChild(contentTable(cols, data));
+document.getElementById("main").appendChild(contentTable(cols, data));
 
 // Render FunctionBars using function 
 const MainDefaultFunctionMap = {
