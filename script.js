@@ -1,3 +1,56 @@
+const Model = (function () {
+  // Manage local storage (writing, reading, lookups using UUIDs, gather queryed Activity/Group info)
+  const STORAGE_KEY = "activities";
+  /**
+   * Set (or clear) local storage
+   * @param {Array<Object>} activities - Array of activities to save locally. If non-array then an empty array is saved. 
+   */
+  const setStore = (activities) => {
+    if (!Array.isArray(activities)) {
+      localStorage.setItem(STORAGE_KEY, []);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, activities);
+  }
+  /**
+   * Read local storage and return it's contents, or empty array if contents corrupted.
+   * @returns {Array<Object>} - Array of activities sorted in order determined by last user-set sort mode.
+   */
+  const getStore = () => {
+    let data = localStorage.getItem(STORAGE_KEY);
+    if (data === null) // uninitialized local storage
+      data = [];
+    if (!Array.isArray(data))
+      throw TypeError("Local storage data is non-array")
+    return data;
+  }
+
+  // runtime parameters
+  let sortedCreationActivities, activitiesIdMap, groupsIdMap,
+    groupActivitiesMap, sortedChronoActivities, uncheckedActivities;
+
+  const fetched = getStore();
+  if (fetched.length === 0) {
+    sortedCreationActivities = [];
+    activitiesIdMap = {};
+    groupsIdMap = {};
+    groupActivitiesMap = {};
+    sortedChronoActivities = [];
+    uncheckedActivities = [];
+  } else {
+    sortedCreationActivities = fetched;
+    activitiesIdMap = Object.fromEntries(sortedCreationActivities.map(activity => [activity.id, activity]));
+    //...groupsIdMap = Object.fromEntries(...));
+    //...groupActivitiesMap = ...
+    sortedChronoActivities = new Array(sortedChronoActivities).sort((first, second) => first.creation - second.creation); // sorts with most recent at n-th index
+    uncheckedActivities = new Array(sortedChronoActivities).filter(activity => !activity.checked_off);
+  }
+
+  return {
+
+  };
+})();
+
 /**
  * Creates HTML elements for the FunctionBar component, attaches the appropriate listener to validate and execute on input based on FunctionMapping and ItemMapping parameters, and returns the div HTMLElement.
  * @param {Object} ItemMapping - the keys must be case-insensitive expected user input strings, and the values must be valid parameters for functions in "FunctionMapping"
@@ -109,31 +162,6 @@ function contentTable(cols, data) {
   return temp.firstChild;
 }
 
-// Manage local storage (writing, reading)
-const STORAGE_KEY = "activities";
-/**
- * Set (or clear) local storage
- * @param {Array<Object>} activities - Array of activities to save locally. If non-array then an empty array is saved. 
- */
-function setStore(activities) {
-  if (!Array.isArray(activities)) {
-    localStorage.setItem(STORAGE_KEY, []);
-    return
-  }
-  localStorage.setItem(STORAGE_KEY, activities);
-}
-/**
- * Read local storage and return it's contents, or empty array if contents corrupted.
- * @returns {Array<Object>} - Array of activities sorted in order determined by last user-set sort mode.
- */
-function getStore() {
-  let data = localStorage.getItem(STORAGE_KEY);
-  if (data === null) // uninitialized local storage
-    data = [];
-  if (!Array.isArray(data))
-    throw TypeError("Local storage data is non-array")
-  return data;
-}
 
 // Linked list implementation
 class Node {
