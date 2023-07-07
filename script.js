@@ -51,31 +51,56 @@ const Model = (function () {
   };
 })();
 
-/**
- * Creates HTML elements for the FunctionBar component, attaches the appropriate listener to validate and execute on input based on FunctionMapping and ItemMapping parameters, and returns the div HTMLElement.
- * @param {Object} ItemMapping - the keys must be case-insensitive expected user input strings, and the values must be valid parameters for functions in "FunctionMapping"
- * @param {Object} FunctionMapping - the keys must be case-insensitive expected user input strings, and the values must be functions with uses relevant to the current state of context
- */
-const FunctionBar = function(FunctionMapping, ItemMapping) {
-  // Validate parameters
-  const isObject = (val) => (typeof val === 'object' && !Array.isArray(val));
-  if (!isObject(FunctionMapping))
-    throw new TypeError("FunctionMapping is non-object");
-  if (typeof ItemMapping !== 'undefined' && !isObject(ItemMapping))
-    throw new TypeError("ItemMapping is defined non-object");
+const ViewModel  = (argumentModel) => (function (m) {
+  const model = m;
+  const state = {};
 
-  // Create necessary HTMLElements
-  const div = document.createElement("div");
-  div.classList.add("function-bar");
-  const input = document.createElement("input");
-  input.type = "text";
-  div.appendChild(input);
+  /**
+   * Modify the application state based on properties of "contextState"; allowed to modify some or all state properties.
+   * @param {{type?: "main" | "modal", title?: string, content?: Array<Array<string>> | [Array<string>, Array<Array<string>>], functionMapping?: Object, itemMapping?: Object}} contextState - An object containing string keys that are ContextState properties and appropriate values
+   */
+  function updateContext(contextState) {
+    const properties = Object.keys(contextState);
 
-  // Set up event listener
-  const expectedFunctionInputs = Object.keys(FunctionMapping);
-  //const MaxExpectedFunctionInputLength = Math.max(expectedFunctionInputs.map((str) => str.length));
-  const expectedItemInputs = typeof ItemMapping === 'object' ? Object.keys(ItemMapping) : undefined;
+    if (properties.indexOf("type") !== -1) {
+      const value = contextState.type;
+      if (typeof value !== 'string')
+        throw new TypeError("unexpected context property type");
+      if (["main", "modal"].includes(value) === false)
+        throw new Error("unexpected parameter value");
+      state.type = value;
+    }
 
+    if (properties.indexOf("title") !== -1) {
+      if (typeof contextState.title !== 'string')
+        throw new TypeError("unexpected context property type");
+      state.title = contextState.title;
+    }
+
+    if (properties.indexOf("content") !== -1) {
+      //TODO: "content" validation
+      state.content = contextState.content;
+    }
+
+    const isObject = (val) => (typeof val === 'object' && !Array.isArray(val));
+    if (properties.indexOf("functionMapping") !== -1) {
+      if (!isObject(contextState.functionMapping))
+        throw new TypeError("unexpected context property type");
+      state.functionMapping = contextState.functionMapping;
+    }
+    if (properties.indexOf("itemMapping") !== -1) {
+      if (!isObject(contextState.itemMapping))
+        throw new TypeError("unexpected context property type");
+      state.itemMapping = contextState.itemMapping;
+    }
+  }
+
+  /**
+   * Search for all members of "expectedInputStringArray" within "str". The first occurence of each member is removed from "str".
+   * @param {string} str - The string to be searched
+   * @param {Array<string>} expectedInputStringArray - An array of strings to be searched for in "str"
+   * @returns {[string, Array<string>]} - A tuple; index 0 contains "str" after matches have been removed & index 1 contains an array of each matched string
+   */
   function searchForMatches(str, expectedInputStringArray) {
     if (!Array.isArray(expectedInputStringArray))
       return alert("Error: not an array!");
@@ -94,20 +119,61 @@ const FunctionBar = function(FunctionMapping, ItemMapping) {
     return [str, matched];
   }
 
-  input.addEventListener("keypress", function(e) {
-    let userInput = input.value, matchedFunctions, matchedItems;
-    if (e.key === 'Enter') { // validate for a function
-      [userInput, matchedFunctions] = searchForMatches(userInput, expectedFunctionInputs);
-      if (matchedFunctions.length !== 0) {
-        if(expectedItemInputs) {
-          [userInput, matchedItems] = searchForMatches(userInput, expectedItemInputs);
-          FunctionMapping[matchedFunctions[0]](...matchedItems);
-        } else {
-          FunctionMapping[matchedFunctions[0]]();
+  // initialize state to main menu context
+  const cols = ["Index", "Options"];
+  const data = [ ["Add task"], ["View history"], ["View archived"] ].map((element, index) => [index + 1, element]);
+
+  state.type = "main";
+  state.title = "Main Menu";
+  state.content = [cols, data];
+  state.functionMapping = {
+    "1": () => document.getElementById("modal-container").style.display = "flex",
+    "2": () => alert("You selected: View history"),
+    "3": () => alert("You selected: View archived"),
+  };
+
+  if (typeof exports !== 'undefined')
+    this.state = state;
+
+  return {
+    /**
+     * Parse user input and execute corresponding user functions; accessible user functions are determined by current application state.
+     * @param {Event} event - The Event object passed from the fired event listener
+     */
+    validateUserFunction(event) {
+      let input = event.target.value;
+      if (event.key === 'Enter') { // validate for a function
+        let matchedFunctions, matchedItems;
+        [input, matchedFunctions] = searchForMatches(input, Object.keys(state.functionMapping));
+        if (matchedFunctions.length !== 0) {
+          if (typeof state.itemMapping !== 'undefined') {
+            [input, matchedItems] = searchForMatches(input, Object.keys(state.itemMapping));
+            state.functionMapping[matchedFunctions[0]](...matchedItems.map(itemUserIndexString => state.itemMapping[itemUserIndexString]));
+          } else {
+            state.functionMapping[matchedFunctions[0]]();
+          }
         }
       }
     }
-  });
+  };
+})(argumentModel);
+
+const viewModel = ViewModel(Model);
+
+/**
+ * Creates HTML elements for the FunctionBar component and attaches a "keypress" listener to validate and execute on input via a ViewModel callback function.
+ * @returns {HTMLElement} - The "div" element, containing the "input" element
+ */
+const FunctionBar = function() {
+  // Create necessary HTMLElements
+  const div = document.createElement("div");
+  div.classList.add("function-bar");
+  const input = document.createElement("input");
+  input.type = "text";
+  div.appendChild(input);
+
+  // Set up event listener
+ input.addEventListener("keypress", viewModel.validateUserFunction);
 
   return div;
 }
@@ -247,6 +313,6 @@ class LinkedList {
 
 // Support module
 if (typeof exports !== 'undefined') {
-  exports.contentTable = contentTable;
-  exports.FunctionBar = FunctionBar;
+  exports.Model = Model;
+  exports.ViewModel = ViewModel;
 }
