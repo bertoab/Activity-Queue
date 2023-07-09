@@ -132,10 +132,8 @@ const ViewModel  = (argumentModel) => (function (m) {
     "3": () => alert("You selected: View archived"),
   };
 
-  if (typeof exports !== 'undefined')
-    this.state = state;
-
   return {
+    state: state,
     /**
      * Parse user input and execute corresponding user functions; accessible user functions are determined by current application state.
      * @param {Event} event - The Event object passed from the fired event listener
