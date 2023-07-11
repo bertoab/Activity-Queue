@@ -54,6 +54,7 @@ const Model = (function () {
 const ViewModel  = (argumentModel) => (function (m) {
   const model = m;
   const state = {};
+  let updateView;
 
   /**
    * Modify the application state based on properties of "contextState"; allowed to modify some or all state properties.
@@ -93,6 +94,9 @@ const ViewModel  = (argumentModel) => (function (m) {
         throw new TypeError("unexpected context property type");
       state.itemMapping = contextState.itemMapping;
     }
+
+    if (typeof updateView === 'function')
+      updateView();
   }
 
   /**
@@ -152,6 +156,9 @@ const ViewModel  = (argumentModel) => (function (m) {
           }
         }
       }
+    },
+    setUpdateView(func) {
+      updateView = func;
     }
   };
 })(argumentModel);
