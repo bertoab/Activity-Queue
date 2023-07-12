@@ -167,74 +167,114 @@ const ViewModel  = (argumentModel) => (function (m) {
 
 const viewModel = ViewModel(Model);
 
-/**
- * Creates HTML elements for the FunctionBar component and attaches a "keypress" listener to validate and execute on input via a ViewModel callback function.
- * @returns {HTMLElement} - The "div" element, containing the "input" element
- */
-const FunctionBar = function() {
-  // Create necessary HTMLElements
-  const div = document.createElement("div");
-  div.classList.add("function-bar");
-  const input = document.createElement("input");
-  input.type = "text";
-  div.appendChild(input);
-
-  // Set up event listener
- input.addEventListener("keypress", viewModel.validateUserFunction);
-
-  return div;
-}
-
-// Render main menu options
-const cols = ["Index", "Options"];
-const data = [ ["Add task"], ["View history"], ["View archived"] ].map((element, index) => [index + 1, element]);
-document.getElementById("main").appendChild(contentTable(cols, data));
-
-// Render FunctionBars using function 
-const MainDefaultFunctionMap = {
-  "1": () => document.getElementById("modal-container").style.display = "flex",
-  "2": () => alert("You selected: View history"),
-  "3": () => alert("You selected: View archived")
-};
-document.getElementById("main").appendChild(FunctionBar(MainDefaultFunctionMap));
-
-const ModalDefaultFunctionMap = {
-  "1": () => document.getElementById("name-field").focus(),
-  "2": () => document.getElementById("group-field").focus(),
-  "3": () => document.getElementById("priority-field").focus()
-};
-document.getElementById("modal").appendChild(FunctionBar(ModalDefaultFunctionMap));
-
-/**
- * Returns an HTML table element based on an array of arrays, where the length of the inner arrays correspond to the number of columns for the table (for a symmetrical, gap-less table)
- * @param {Array<string>} cols - an array of strings to name the table columns
- * @param {Array<Array<string>>} data - a 2-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
- */
-function contentTable(cols, data) {
-  if (!Array.isArray(cols) || !Array.isArray(data))
-    throw new TypeError("One or both arguments are non-array");
-  let tableHTML = `<table>
-    <thead>
-      <tr>`;
-  for (let i = 0; i < cols.length; i++) {
-    tableHTML += `<th>${cols[i]}</th>`;
+const View = (argumentViewModel) => (function (vm) {
+  const viewModel = vm;
+  viewModel.setUpdateView(render);
+  
+  /**
+   * Creates a styled "div" for a header
+   * @param {string} value - The title string to display in the header
+   * @returns {HTMLElement} - The "div" element
+   */
+  function createHeader(value) {
+    if (typeof value !== 'string')
+      throw new TypeError("unexpected parameter type"); //TODO: implement support for Array<HTMLElement>
+    const headerDiv = document.createElement("div");
+    headerDiv.classList.add("header");
+    headerDiv.innerText = value;
+    return headerDiv;
   }
-  tableHTML += `</tr>
-    </thead>
-    <tbody>`;
-  for (let i = 0; i < data.length; i++) {
-    for (let j = 0; j < data[i].length; j++) {
-      tableHTML += `<td>${data[i][j]}</td>`;
+
+  /**
+   * Returns an HTML table element based on an array of arrays, accepting a single-layer array for the columns and a two-layer array for the data 
+   * @param {Array<string>} cols - an array of strings to name the table columns
+   * @param {Array<Array<string>>} data - a two-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
+   * @returns {HTMLElement}
+   */
+  function contentTable(cols, data) {
+    if (!Array.isArray(cols) || !Array.isArray(data))
+      throw new TypeError("One or both arguments are non-array");
+    let tableHTML = `<table>
+      <thead>
+        <tr>`;
+    for (let i = 0; i < cols.length; i++) {
+      tableHTML += `<th>${cols[i]}</th>`;
     }
-    tableHTML += `</tr>`;
+    tableHTML += `</tr>
+      </thead>
+      <tbody>`;
+    for (let i = 0; i < data.length; i++) {
+      for (let j = 0; j < data[i].length; j++) {
+        tableHTML += `<td>${data[i][j]}</td>`;
+      }
+      tableHTML += `</tr>`;
+    }
+    tableHTML += `</tbody>
+    </table>`;
+    const temp = document.createElement("div");
+    temp.innerHTML = tableHTML;
+    return temp.firstChild;
   }
-  tableHTML += `</tbody>
-  </table>`;
-  const temp = document.createElement("div");
-  temp.innerHTML = tableHTML;
-  return temp.firstChild;
-}
 
+  /**
+   * Accepts "content" property of application state and returns the appropriately formatted HTMLElement to display as the main content
+   * @param {Array} param1 
+   * @param {Array | undefined} param2 
+   * @returns {HTMLElement}
+   */
+  function prepareContent(param1, param2) {
+    return typeof param2 === 'undefined' ? parametersContainer(param1) : contentTable(param1, param2);
+  }
+
+  /**
+   * Creates HTML elements for the FunctionBar component and attaches a "keypress" listener to validate and execute on input via a ViewModel callback function.
+   * @returns {HTMLElement} - The "div" element, containing the "input" element
+   */
+  function FunctionBar() {
+    // Create necessary HTMLElements
+    const div = document.createElement("div");
+    div.classList.add("function-bar");
+    const input = document.createElement("input");
+    input.type = "text";
+    div.appendChild(input);
+  
+    // Set up event listener
+   input.addEventListener("keypress", viewModel.validateUserFunction);
+  
+    return div;
+  }
+
+  /**
+   * Draw the current application state to the screen. Removes all elements from the corresponding context div before drawing
+   */
+  function render() {
+    // select context div
+    let contextDiv;
+    if (viewModel.state.type === "main") {
+      contextDiv = document.getElementById("main");
+      document.getElementById("modal-container").style.display = "none";
+    } else if (viewModel.state.type === "modal") {
+      contextDiv = document.getElementById("modal");
+      document.getElementById("modal-container").style.display = "flex";
+    }
+    if (contextDiv === undefined)
+      throw new Error("context div not selectable");
+
+    // remove existing components
+    while (contextDiv.firstChild)
+      contextDiv.removeChild(contextDiv.firstChild);
+
+    // draw
+    contextDiv.appendChild(createHeader(viewModel.state.title));
+    contextDiv.appendChild(prepareContent(...viewModel.state.content));
+    const funcBar = FunctionBar(); // define as variable to set cursor focus
+    contextDiv.appendChild(funcBar);
+    funcBar.firstChild.focus();
+  }
+
+})(argumentViewModel);
+
+const view = View(viewModel);
 
 // Linked list implementation
 class Node {
