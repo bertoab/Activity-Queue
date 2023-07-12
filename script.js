@@ -158,6 +158,8 @@ const ViewModel  = (argumentModel) => (function (m) {
       }
     },
     setUpdateView(func) {
+      if (typeof updateView === 'undefined')
+        func();
       updateView = func;
     }
   };
