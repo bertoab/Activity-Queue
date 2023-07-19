@@ -362,4 +362,5 @@ class LinkedList {
 if (typeof exports !== 'undefined') {
   exports.Model = Model;
   exports.ViewModel = ViewModel;
+  exports.View = View;
 }
