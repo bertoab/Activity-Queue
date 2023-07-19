@@ -359,7 +359,7 @@ class LinkedList {
 }
 
 // Support module
-if (typeof exports !== 'undefined') {
+if (typeof exports === 'object') {
   exports.Model = Model;
   exports.ViewModel = ViewModel;
   exports.View = View;
