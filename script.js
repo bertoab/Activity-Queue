@@ -111,8 +111,7 @@ const ViewModel  = (argumentModel) => (function (m) {
 
     const matched = [];
     let searchIndex;
-    str = str.toLowerCase();
-    expectedInputStringArray = expectedInputStringArray.map(expectedInputString => expectedInputString.toLowerCase());
+    str = str.toUpperCase();
     expectedInputStringArray.forEach(expectedInput => {
       searchIndex = str.indexOf(expectedInput);
       if (searchIndex != -1) {
