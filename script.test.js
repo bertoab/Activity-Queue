@@ -46,7 +46,31 @@ describe('ViewModel', () => {
       }
     };
 
-    test.todo("when multiple user function acronym strings are present, only match the first one");
+    test("when multiple user function acronym strings are present, only match the first one", () => {
+      // run 1 (setup)
+      const [pass, fail] = createPassFailFunctions();
+
+      viewModel.state.functionMapping = {
+        "A": pass,
+        "B": fail,
+        "C": fail
+      };
+      
+      const event = createSyntheticKeyboardEvent("DEABC");
+      viewModel.validateUserFunction(event); // PASS
+
+      // run 2
+      event.target.value = "ABC";
+      viewModel.validateUserFunction(event); // PASS
+
+      // run 3
+      event.target.value = "BA";
+      viewModel.validateUserFunction(event); // FAIL
+
+      // assertions
+      expect(pass.mock.calls).toHaveLength(2);
+      expect(fail.mock.calls).toHaveLength(1);
+    });
     test.todo("match user function acronym strings in a case-insensitive manner");
     test.todo("when user function acronym strings are 2+ letters in length, match them before those of lesser length");
     test.todo("when a user function acronym string and a single integer index content item are matched, user function is called with corresponding content item value")
