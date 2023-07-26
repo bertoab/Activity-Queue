@@ -71,7 +71,46 @@ describe('ViewModel', () => {
       expect(pass.mock.calls).toHaveLength(2);
       expect(fail.mock.calls).toHaveLength(1);
     });
-    test.todo("match user function acronym strings in a case-insensitive manner");
+    test("match user function acronym strings in a case-insensitive manner", () => {
+      // run 1 (setup)
+      const [pass, fail] = createPassFailFunctions();
+
+      viewModel.state.functionMapping = {
+        "A": pass,
+        "B": pass,
+        "C": pass,
+        "GH": pass,
+        "DEF": pass,
+        "Z": fail
+      };
+
+      const event = createSyntheticKeyboardEvent("lJhcFaZ");
+      viewModel.validateUserFunction(event);
+
+      // run 2
+      event.target.value = "bZ";
+      viewModel.validateUserFunction(event); // PASS
+
+      // run 3
+      event.target.value = "mKC";
+      viewModel.validateUserFunction(event); // PASS
+
+      // run 4
+      event.target.value = "deBZ";
+      viewModel.validateUserFunction(event); // PASS
+
+      // run 5
+      event.target.value = "jnGh";
+      viewModel.validateUserFunction(event); // PASS
+
+      // run 6
+      event.target.value = "zABC";
+      viewModel.validateUserFunction(event); // FAIL
+
+      // assertions
+      expect(pass.mock.calls).toHaveLength(5);
+      expect(fail.mock.calls).toHaveLength(1);
+    });
     test.todo("when user function acronym strings are 2+ letters in length, match them before those of lesser length");
     test.todo("when a user function acronym string and a single integer index content item are matched, user function is called with corresponding content item value")
     test.todo("when a user function acronym string and two integer index content items (separated by a comma) are matched, user function is called with first matched content item value as first argument, and second matched content item value as second argument")
