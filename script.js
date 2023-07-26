@@ -109,17 +109,13 @@ const ViewModel  = (argumentModel) => (function (m) {
     if (!Array.isArray(expectedInputStringArray))
       return alert("Error: not an array!");
 
-    const matched = [];
-    let searchIndex;
     str = str.toUpperCase();
-    expectedInputStringArray.forEach(expectedInput => {
-      searchIndex = str.indexOf(expectedInput);
-      if (searchIndex != -1) {
-        str = str.substring(searchIndex + expectedInput.length);
-        matched.push(expectedInput);
-      }
-    });
-    return [str, matched];
+    expectedInputStringArray.sort( (a, b) => b.length - a.length ); // highest length first
+    expectedInputStringArray = expectedInputStringArray.filter( val => str.includes(val) ); // remove strings not present in str
+    expectedInputStringArray.sort( (a, b) => str.indexOf(a) - str.indexOf(b) ); // earliest occurrence in str first
+    expectedInputStringArray.forEach( expectedInput => str = str.replace(expectedInput, "") ); // remove first match from str
+
+    return [str, expectedInputStringArray];
   }
 
   // initialize state to main menu context
