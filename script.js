@@ -134,22 +134,18 @@ const ViewModel  = (argumentModel) => (function (m) {
   return {
     state: state,
     /**
-     * Parse user input and execute corresponding user functions; accessible user functions are determined by current application state.
+     * Parse user input for a corresponding user function acronym string, and execute; accessible user functions are determined by current application state.
      * @param {Event} event - The Event object passed from the fired event listener
      */
     validateUserFunction(event) {
-      let input = event.target.value;
-      if (event.key === 'Enter') { // validate for a function
-        let matchedFunctions, matchedItems;
-        [input, matchedFunctions] = searchForMatches(input, Object.keys(state.functionMapping));
+      let inputArray = event.target.value.split(",").map(str => str.trim()); // split raw input by "," delimiter and trim trailing whitespace
+      if (event.key === 'Enter') { // validate for a user function
+        let matchedFunctions;
+        [inputArray[0], matchedFunctions] = searchForMatches(inputArray[0], Object.keys(state.functionMapping));
         if (matchedFunctions.length !== 0) {
-          if (typeof state.itemMapping !== 'undefined') {
-            [input, matchedItems] = searchForMatches(input, Object.keys(state.itemMapping));
-            state.functionMapping[matchedFunctions[0]](...matchedItems.map(itemUserIndexString => state.itemMapping[itemUserIndexString]));
-          } else {
-            state.functionMapping[matchedFunctions[0]]();
-          }
-        }
+          inputArray.shift();
+          state.functionMapping[matchedFunctions[0]](...inputArray);
+        } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
       }
     },
     setUpdateView(func) {
