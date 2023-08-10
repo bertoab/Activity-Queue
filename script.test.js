@@ -151,8 +151,10 @@ describe('ViewModel', () => {
       expect(pass.mock.calls).toHaveLength(4);
       expect(fail.mock.calls).toHaveLength(2);
     });
-    test.todo("when a user function acronym string and a single integer index content item are matched, user function is called with corresponding content item value")
-    test.todo("when a user function acronym string and two integer index content items (separated by a comma) are matched, user function is called with first matched content item value as first argument, and second matched content item value as second argument")
+    test.todo("when a user function acronym string is matched and a single integer index is present, user function is called with integer index as sole parameter");
+    test.todo("when a user function acronym string is matched and two integer indexes (separated by a comma) are present, user function is called with first integer index as first argument, and second integer index as second argument");
+    test.todo("when a user function acronym string is matched and a single integer index is present but there are extra alphabetical characters in the string, the function is not executed and an 'Invalid Input' alert is shown via context update");
+    test.todo("when a user function acronym string is matched and a single integer index is present with a non-conventional format (hexadecimal, binary, or decimal exponentation notation), an alert 'Invalid Input' is shown via context update");
   });
 });
 describe('View', () => {});
