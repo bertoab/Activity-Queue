@@ -151,7 +151,32 @@ describe('ViewModel', () => {
       expect(pass.mock.calls).toHaveLength(4);
       expect(fail.mock.calls).toHaveLength(2);
     });
-    test.todo("when a user function acronym string is matched and a single integer index is present, user function is called with integer index as sole parameter");
+    test("when a user function acronym string is matched and a single integer index is present, user function is called with integer index as sole parameter", () => {
+      // run 1 (setup)
+      const pass = jest.fn();
+
+      viewModel.state.functionMapping = {
+        "A": pass
+      };
+
+      const event = createSyntheticKeyboardEvent("A1");
+      viewModel.validateUserFunction(event);
+
+      // run 2
+      event.target.value = "A12";
+      viewModel.validateUserFunction(event);
+
+      // run 3
+      event.target.value = "A9";
+      viewModel.validateUserFunction(event);
+
+      // run 4
+      event.target.value = "A0";
+      viewModel.validateUserFunction(event);
+
+      // assertions
+      expect(pass.mock.calls).toEqual([["1"], ["12"], ["9"], ["0"]]);
+    });
     test.todo("when a user function acronym string is matched and two integer indexes (separated by a comma) are present, user function is called with first integer index as first argument, and second integer index as second argument");
     test.todo("when a user function acronym string is matched and a single integer index is present but there are extra alphabetical characters in the string, the function is not executed and an 'Invalid Input' alert is shown via context update");
     test.todo("when a user function acronym string is matched and a single integer index is present with a non-conventional format (hexadecimal, binary, or decimal exponentation notation), an alert 'Invalid Input' is shown via context update");
