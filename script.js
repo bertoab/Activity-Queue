@@ -143,7 +143,13 @@ const ViewModel  = (argumentModel) => (function (m) {
         let matchedFunctions;
         [inputArray[0], matchedFunctions] = searchForMatches(inputArray[0], Object.keys(state.functionMapping));
         if (matchedFunctions.length !== 0) {
-          inputArray.shift();
+          if (inputArray[0] === "")
+            inputArray.shift();
+          else { // ensure remaining string of inputArray[0] contains digits (0-9)
+            for (let i = 0; i < inputArray[0].length; i++)
+              if (inputArray[0].charCodeAt(i) < 48 || inputArray[0].charCodeAt(i) > 57)
+                undefined; // TODO: reject input; send "Invalid Input" alert
+          }
           state.functionMapping[matchedFunctions[0]](...inputArray);
         } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
       }
