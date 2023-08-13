@@ -107,7 +107,7 @@ const ViewModel  = (argumentModel) => (function (m) {
    */
   function searchForMatches(str, expectedInputStringArray) {
     if (!Array.isArray(expectedInputStringArray))
-      return alert("Error: not an array!");
+      throw new TypeError("unexpected parameter type");
 
     str = str.toUpperCase();
     expectedInputStringArray.sort( (a, b) => b.length - a.length ); // highest length first
