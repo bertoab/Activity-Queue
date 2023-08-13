@@ -120,7 +120,7 @@ const ViewModel  = (argumentModel) => (function (m) {
 
   // initialize state to main menu context
   const cols = ["Index", "Options"];
-  const data = [ ["Add task"], ["View history"], ["View archived"] ].map((element, index) => [index + 1, element]);
+  const data = ["Add task", "View history", "View archived"].map((optionName, index) => [index + 1, optionName]);
 
   state.type = "main";
   state.title = "Main Menu";
