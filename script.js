@@ -100,6 +100,21 @@ const ViewModel  = (argumentModel) => (function (m) {
   }
 
   /**
+   * Return a context object for an error. The context is a modal type with the title "Error" and the passed message as the content.
+   * @param {string} message - The error message to be displayed
+   * @returns {{type: "modal", title: "Error", content: message}}
+   */
+  function errorContext(message) {
+    if (typeof message !== 'string')
+      throw new TypeError("unexpected parameter type");
+    return {
+      type: "modal",
+      title: "Error",
+      content: message
+    };
+  }
+
+  /**
    * Search for all members of "expectedInputStringArray" within "str". The first occurence of each member is removed from "str".
    * @param {string} str - The string to be searched
    * @param {Array<string>} expectedInputStringArray - An array of strings to be searched for in "str"
@@ -148,7 +163,7 @@ const ViewModel  = (argumentModel) => (function (m) {
           else { // ensure remaining string of inputArray[0] contains digits (0-9)
             for (let i = 0; i < inputArray[0].length; i++)
               if (inputArray[0].charCodeAt(i) < 48 || inputArray[0].charCodeAt(i) > 57)
-                undefined; // TODO: reject input; send "Invalid Input" alert
+                return updateContext(errorContext("Invalid Input"));
           }
           state.functionMapping[matchedFunctions[0]](...inputArray);
         } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
