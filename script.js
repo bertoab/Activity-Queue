@@ -219,8 +219,24 @@ const View = (argumentViewModel) => (function (vm) {
    * @param {Array | undefined} param2 
    * @returns {HTMLElement}
    */
-  function prepareContent(param1, param2) {
-    return typeof param2 === 'undefined' ? parametersContainer(param1) : contentTable(param1, param2);
+  function prepareContent(content) {
+    if (Array.isArray(content)) {
+      if (content.length === 2) { // potential contentTable args
+        // validate "data" argument is two-dimensional
+        const nonArrays = content[1].filter( arrayElement => Array.isArray(arrayElement) === false );
+        if (Array.isArray(content[0]) && nonArrays.length === 0)
+          return contentTable(content[0], content[1]);
+      }
+      return parametersContainer(content);
+    }
+    
+    if (typeof content === 'string') {
+      const paragraph = document.createElement("p");
+      paragraph.innerText = content;
+      return paragraph;
+    }
+
+    throw new TypeError("unexpected parameter type");
   }
 
   /**
@@ -263,7 +279,7 @@ const View = (argumentViewModel) => (function (vm) {
 
     // draw
     contextDiv.appendChild(createHeader(viewModel.state.title));
-    contextDiv.appendChild(prepareContent(...viewModel.state.content));
+    contextDiv.appendChild(prepareContent(viewModel.state.content));
     const funcBar = FunctionBar(); // define as variable to set cursor focus
     contextDiv.appendChild(funcBar);
     funcBar.firstChild.focus();
