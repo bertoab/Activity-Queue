@@ -94,23 +94,18 @@ describe('ViewModel', () => {
       // run 1
       const event = createSyntheticKeyboardEvent("a");
       viewModel.validateUserFunction(event);
-
       // run 2
       event.target.value = "B";
       viewModel.validateUserFunction(event);
-
       // run 3
       event.target.value = "Gh";
       viewModel.validateUserFunction(event);
-
       // run 4
       event.target.value = "Def";
       viewModel.validateUserFunction(event);
-
       // run 5
       event.target.value = "gH";
       viewModel.validateUserFunction(event);
-
       // run 6
       event.target.value = "c";
       viewModel.validateUserFunction(event);
@@ -121,7 +116,6 @@ describe('ViewModel', () => {
     test("when user function acronym strings are 2+ letters in length, match them before those of lesser length", () => {
       // setup
       const pass = jest.fn(), fail = jest.fn();
-
       viewModel.state.functionMapping = {
         "A": fail,
         "ABC": pass,
@@ -145,24 +139,20 @@ describe('ViewModel', () => {
       expect(fail.mock.calls).toHaveLength(0);
     });
     test("when a user function acronym string is matched and a single integer index is present, user function is called with integer index as sole parameter", () => {
-      // run 1 (setup)
+      // setup
       const pass = jest.fn();
-
       viewModel.state.functionMapping = {
         "A": pass
       };
-
+      // run 1
       const event = createSyntheticKeyboardEvent("A1");
       viewModel.validateUserFunction(event);
-
       // run 2
       event.target.value = "A12";
       viewModel.validateUserFunction(event);
-
       // run 3
       event.target.value = "A9";
       viewModel.validateUserFunction(event);
-
       // run 4
       event.target.value = "A0";
       viewModel.validateUserFunction(event);
@@ -171,24 +161,20 @@ describe('ViewModel', () => {
       expect(pass.mock.calls).toEqual([["1"], ["12"], ["9"], ["0"]]);
     });
     test("when a user function acronym string is matched and two integer indexes (separated by a comma) are present, user function is called with first integer index as first argument, and second integer index as second argument", () => {
-      // run 1 (setup)
+      // setup
       const pass = jest.fn();
-
       viewModel.state.functionMapping = {
         "A": pass
       };
-
+      // run 1
       const event = createSyntheticKeyboardEvent("A1,1");
       viewModel.validateUserFunction(event);
-
       // run 2
       event.target.value = "A1,9";
       viewModel.validateUserFunction(event);
-
       // run 3
       event.target.value = "A31,29";
       viewModel.validateUserFunction(event);
-
       // run 4
       event.target.value = "A0,12";
       viewModel.validateUserFunction(event);
