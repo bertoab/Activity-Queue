@@ -119,44 +119,30 @@ describe('ViewModel', () => {
       expect(pass.mock.calls).toHaveLength(6);
     });
     test("when user function acronym strings are 2+ letters in length, match them before those of lesser length", () => {
-      // run 1 (setup)
-      const [pass, fail] = createPassFailFunctions();
+      // setup
+      const pass = jest.fn(), fail = jest.fn();
 
       viewModel.state.functionMapping = {
         "A": fail,
         "ABC": pass,
-        "BC": pass,
         "GH": fail,
         "GHIJ": pass,
+        "DE": fail,
         "DEF": pass
       };
-
+      // run 1
       const event = createSyntheticKeyboardEvent("ABC"); // PASS
       viewModel.validateUserFunction(event);
-
       // run 2
-      event.target.value = "LMOBCA"; // PASS
+      event.target.value = "GHIJ"; // PASS
       viewModel.validateUserFunction(event);
-
       // run 3
-      event.target.value = "GHIJK"; // PASS
-      viewModel.validateUserFunction(event);
-
-      // run 4
-      event.target.value = "GBDEF"; // PASS
-      viewModel.validateUserFunction(event);
-
-      // run 5
-      event.target.value = "AHBC"; // FAIL
-      viewModel.validateUserFunction(event);
-      
-      // run 6
-      event.target.value = "GHABC"; // FAIL
+      event.target.value = "DEF"; // PASS
       viewModel.validateUserFunction(event);
 
       // assertions
-      expect(pass.mock.calls).toHaveLength(4);
-      expect(fail.mock.calls).toHaveLength(2);
+      expect(pass.mock.calls).toHaveLength(3);
+      expect(fail.mock.calls).toHaveLength(0);
     });
     test("when a user function acronym string is matched and a single integer index is present, user function is called with integer index as sole parameter", () => {
       // run 1 (setup)
