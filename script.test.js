@@ -4,11 +4,6 @@
 
 let script;
 let model, viewModel, view;
-/**
- * Create a pair of "pass" and "fail" jest mock functions to track callback executions within tests
- * @returns {[jest.fn, jest.fn]}
- */
-const createPassFailFunctions = () => [jest.fn(), jest.fn()];
 
 beforeAll(() => {
 	// set up DOM
@@ -45,31 +40,46 @@ describe('ViewModel', () => {
         target: { value: startingInput }
       }
     };
+    /**
+     * Assert that an errorContext is set in application state. Then, reset state to mainMenuContext with testMapping as context's functionMapping.
+     * @param {string} expectedErrorMessage
+     * @param {object} testMapping The functionMapping object to be applied after resetting context
+     */
+    const assertErrorContextAndReset = function(expectedErrorMessage, testMapping) {
+      expect(viewModel.state).toEqual(expect.objectContaining({
+        type: "modal",
+        title: "Error",
+        content: expectedErrorMessage
+      }));
+      Object.assign(viewModel.state, viewModel.mainMenuContext);
+      viewModel.state.functionMapping = testMapping;
+    };
 
-    test("when multiple user function acronym strings are present, only match the first one", () => {
-      // run 1 (setup)
-      const [pass, fail] = createPassFailFunctions();
-
-      viewModel.state.functionMapping = {
-        "A": pass,
+    test("when multiple user function acronym strings and/or extra alphabetical characters are present, execute none and change context to errorModal", () => {
+      // setup
+      const fail = jest.fn();
+      const errorMessage = "Invalid Input";
+      const testFunctionMapping = {
+        "A": fail,
         "B": fail,
         "C": fail
       };
-      
-      const event = createSyntheticKeyboardEvent("DEABC");
-      viewModel.validateUserFunction(event); // PASS
-
+      viewModel.state.functionMapping = testFunctionMapping;
+      // run 1
+      const event = createSyntheticKeyboardEvent("AB");
+      viewModel.validateUserFunction(event);
+      assertErrorContextAndReset(errorMessage, testFunctionMapping);
       // run 2
       event.target.value = "ABC";
-      viewModel.validateUserFunction(event); // PASS
-
+      viewModel.validateUserFunction(event);
+      assertErrorContextAndReset(errorMessage, testFunctionMapping);
       // run 3
-      event.target.value = "BA";
-      viewModel.validateUserFunction(event); // FAIL
+      event.target.value = "C A";
+      viewModel.validateUserFunction(event);
+      assertErrorContextAndReset(errorMessage, testFunctionMapping);
 
       // assertions
-      expect(pass.mock.calls).toHaveLength(2);
-      expect(fail.mock.calls).toHaveLength(1);
+      expect(fail.mock.calls).toHaveLength(0);
     });
     test("match user function acronym strings in a case-insensitive manner", () => {
       // run 1 (setup)
