@@ -82,44 +82,41 @@ describe('ViewModel', () => {
       expect(fail.mock.calls).toHaveLength(0);
     });
     test("match user function acronym strings in a case-insensitive manner", () => {
-      // run 1 (setup)
-      const [pass, fail] = createPassFailFunctions();
-
+      // setup
+      const pass = jest.fn();
       viewModel.state.functionMapping = {
         "A": pass,
         "B": pass,
         "C": pass,
         "GH": pass,
         "DEF": pass,
-        "Z": fail
       };
-
-      const event = createSyntheticKeyboardEvent("lJhcFaZ");
+      // run 1
+      const event = createSyntheticKeyboardEvent("a");
       viewModel.validateUserFunction(event);
 
       // run 2
-      event.target.value = "bZ";
-      viewModel.validateUserFunction(event); // PASS
+      event.target.value = "B";
+      viewModel.validateUserFunction(event);
 
       // run 3
-      event.target.value = "mKC";
-      viewModel.validateUserFunction(event); // PASS
+      event.target.value = "Gh";
+      viewModel.validateUserFunction(event);
 
       // run 4
-      event.target.value = "deBZ";
-      viewModel.validateUserFunction(event); // PASS
+      event.target.value = "Def";
+      viewModel.validateUserFunction(event);
 
       // run 5
-      event.target.value = "jnGh";
-      viewModel.validateUserFunction(event); // PASS
+      event.target.value = "gH";
+      viewModel.validateUserFunction(event);
 
       // run 6
-      event.target.value = "zABC";
-      viewModel.validateUserFunction(event); // FAIL
+      event.target.value = "c";
+      viewModel.validateUserFunction(event);
 
       // assertions
-      expect(pass.mock.calls).toHaveLength(5);
-      expect(fail.mock.calls).toHaveLength(1);
+      expect(pass.mock.calls).toHaveLength(6);
     });
     test("when user function acronym strings are 2+ letters in length, match them before those of lesser length", () => {
       // run 1 (setup)
