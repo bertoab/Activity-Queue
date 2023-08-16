@@ -133,21 +133,22 @@ const ViewModel  = (argumentModel) => (function (m) {
     return [str, expectedInputStringArray];
   }
 
-  // initialize state to main menu context
-  const cols = ["Index", "Options"];
-  const data = ["Add task", "View history", "View archived"].map((optionName, index) => [index + 1, optionName]);
-
-  state.type = "main";
-  state.title = "Main Menu";
-  state.content = [cols, data];
-  state.functionMapping = {
-    "1": () => document.getElementById("modal-container").style.display = "flex",
-    "2": () => alert("You selected: View history"),
-    "3": () => alert("You selected: View archived"),
+  const mainMenuContext = {
+    type: "main",
+    title: "Main Menu",
+    content: [["Index", "Options"], ["Add task", "View history", "View archived"].map((optionName, index) => [index + 1, optionName])],
+    functionMapping: {
+      "1": () => document.getElementById("modal-container").style.display = "flex",
+      "2": () => alert("You selected: View history"),
+      "3": () => alert("You selected: View archived"),
+    }
   };
+  // initialize state to main menu context
+  Object.assign(state, mainMenuContext);
 
   return {
     state: state,
+    mainMenuContext: mainMenuContext, // for testing
     /**
      * Parse user input for a corresponding user function acronym string, and execute; accessible user functions are determined by current application state.
      * @param {Event} event - The Event object passed from the fired event listener
