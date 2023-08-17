@@ -115,10 +115,10 @@ const ViewModel  = (argumentModel) => (function (m) {
   }
 
   /**
-   * Search for all members of "expectedInputStringArray" within "str". The first occurence of each member is removed from "str".
+   * Search for all members of "expectedInputStringArray" within "str". The first occurring member within "expectedInputStringArray" is removed from "str".
    * @param {string} str - The string to be searched
    * @param {Array<string>} expectedInputStringArray - An array of strings to be searched for in "str"
-   * @returns {[string, Array<string>]} - A tuple; index 0 contains "str" after matches have been removed & index 1 contains an array of each matched string
+   * @returns {[string, Array<string>]} - A tuple; index 0 contains "str" after the first matched string has been removed & index 1 contains an array of each matched string
    */
   function searchForMatches(str, expectedInputStringArray) {
     if (!Array.isArray(expectedInputStringArray))
@@ -128,7 +128,7 @@ const ViewModel  = (argumentModel) => (function (m) {
     expectedInputStringArray.sort( (a, b) => b.length - a.length ); // highest length first
     expectedInputStringArray = expectedInputStringArray.filter( val => str.includes(val) ); // remove strings not present in str
     expectedInputStringArray.sort( (a, b) => str.indexOf(a) - str.indexOf(b) ); // earliest occurrence in str first
-    expectedInputStringArray.forEach( expectedInput => str = str.replace(expectedInput, "") ); // remove first match from str
+    str = str.replace(expectedInputStringArray[0], ""); // remove earliest occurring string from str
 
     return [str, expectedInputStringArray];
   }
