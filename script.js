@@ -62,7 +62,6 @@ const ViewModel  = (argumentModel) => (function (m) {
    */
   function updateContext(contextState) {
     const properties = Object.keys(contextState);
-
     if (properties.indexOf("type") !== -1) {
       const value = contextState.type;
       if (typeof value !== 'string')
@@ -71,18 +70,15 @@ const ViewModel  = (argumentModel) => (function (m) {
         throw new Error("unexpected parameter value");
       state.type = value;
     }
-
     if (properties.indexOf("title") !== -1) {
       if (typeof contextState.title !== 'string')
         throw new TypeError("unexpected context property type");
       state.title = contextState.title;
     }
-
     if (properties.indexOf("content") !== -1) {
       //TODO: "content" validation
       state.content = contextState.content;
     }
-
     const isObject = (val) => (typeof val === 'object' && !Array.isArray(val));
     if (properties.indexOf("functionMapping") !== -1) {
       if (!isObject(contextState.functionMapping))
@@ -98,7 +94,6 @@ const ViewModel  = (argumentModel) => (function (m) {
     if (typeof updateView === 'function')
       updateView();
   }
-
   /**
    * Return a context object for an error. The context is a modal type with the title "Error" and the passed message as the content.
    * @param {string} message - The error message to be displayed
@@ -197,7 +192,6 @@ const View = (argumentViewModel) => (function (vm) {
     headerDiv.innerText = value;
     return headerDiv;
   }
-
   /**
    * Returns an HTML table element based on an array of arrays, accepting a single-layer array for the columns and a two-layer array for the data 
    * @param {Array<string>} cols - an array of strings to name the table columns
@@ -228,7 +222,6 @@ const View = (argumentViewModel) => (function (vm) {
     temp.innerHTML = tableHTML;
     return temp.firstChild;
   }
-
   /**
    * Accepts "content" property of application state and returns the appropriately formatted HTMLElement to display as the main content
    * @param {Array} param1 
@@ -245,7 +238,6 @@ const View = (argumentViewModel) => (function (vm) {
       }
       return parametersContainer(content);
     }
-    
     if (typeof content === 'string') {
       const paragraph = document.createElement("p");
       paragraph.innerText = content;
@@ -254,7 +246,6 @@ const View = (argumentViewModel) => (function (vm) {
 
     throw new TypeError("unexpected parameter type");
   }
-
   /**
    * Creates HTML elements for the FunctionBar component and attaches a "keypress" listener to validate and execute on input via a ViewModel callback function.
    * @returns {HTMLElement} - The "div" element, containing the "input" element
@@ -266,9 +257,8 @@ const View = (argumentViewModel) => (function (vm) {
     const input = document.createElement("input");
     input.type = "text";
     div.appendChild(input);
-  
     // Set up event listener
-   input.addEventListener("keypress", viewModel.validateUserFunction);
+    input.addEventListener("keypress", viewModel.validateUserFunction);
   
     return div;
   }
@@ -288,11 +278,9 @@ const View = (argumentViewModel) => (function (vm) {
     }
     if (contextDiv === undefined)
       throw new Error("context div not selectable");
-
     // remove existing components
     while (contextDiv.firstChild)
       contextDiv.removeChild(contextDiv.firstChild);
-
     // draw
     contextDiv.appendChild(createHeader(viewModel.state.title));
     contextDiv.appendChild(prepareContent(viewModel.state.content));
