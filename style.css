@@ -21,6 +21,11 @@ input[type="text"] {
   margin-right: 10px;
 }
 
+.header {
+  margin-bottom: 1em;
+  text-align: center;
+}
+
 #modal-container {
   display: flex;
   justify-content: center;
@@ -38,6 +43,17 @@ input[type="text"] {
   border: 1px solid black;
   width: 50%;
   padding: 20px;
+}
+
+#modal p {
+  background-color: lightgrey;
+  padding: 5px;
+}
+
+.parameters-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .parameter {
