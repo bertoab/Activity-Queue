@@ -223,6 +223,38 @@ const View = (argumentViewModel) => (function (vm) {
     return temp.firstChild;
   }
   /**
+   * Returns an HTML div element containing parameter information, based on an array of arrays detailing their names, visual indexes, and CSS id attributes
+   * @param {Array<Array<string>} parametersArray - two-layer array; the inner arrays must contain either a single string value or 3 values, where the first index is a string corresponding to the name of the parameter, the second index is a string that is the visual index value of the parameter, and the third index is a string that is the id CSS attribute of the input element for the parameter
+   * @returns {HTMLElement}
+   */
+  function parametersContainer(parametersArray) {
+    // validate argument
+    if (!Array.isArray(parametersArray))
+      throw new TypeError("unexpected parameter type");
+    for (const element of parametersArray) {
+      if (!Array.isArray(element) || element.length === 2 || element.length > 3)
+        throw new TypeError("unexpected parameter type");
+    };
+
+    const container = document.createElement("div");
+    container.classList.add("parameters-container");
+    for (const parameterDetails of parametersArray) {
+      const parameterDiv = document.createElement("div");
+      parameterDiv.classList.add("parameter");
+      const label = document.createElement("p");
+      label.innerText = parameterDetails.length === 3 ? `${parameterDetails[1]}. ${parameterDetails[0]}` : label.innerText = parameterDetails[0];
+      parameterDiv.appendChild(label);
+      if (parameterDetails.length === 3) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.setAttribute("id", parameterDetails[2]);
+        parameterDiv.appendChild(input);
+      }
+      container.appendChild(parameterDiv);
+    }
+    return container;
+  }
+  /**
    * Accepts "content" property of application state and returns the appropriately formatted HTMLElement to display as the main content
    * @param {Array} param1 
    * @param {Array | undefined} param2 
