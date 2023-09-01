@@ -198,7 +198,7 @@ const View = (argumentViewModel) => (function (vm) {
    * @param {Array<Array<string>>} data - a two-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
    * @returns {HTMLElement}
    */
-  function contentTable(cols, data) {
+  function tableContainer(cols, data, title) {
     if (!Array.isArray(cols) || !Array.isArray(data))
       throw new TypeError("One or both arguments are non-array");
     let tableHTML = `<table>
@@ -218,9 +218,15 @@ const View = (argumentViewModel) => (function (vm) {
     }
     tableHTML += `</tbody>
     </table>`;
-    const temp = document.createElement("div");
-    temp.innerHTML = tableHTML;
-    return temp.firstChild;
+    const div = document.createElement("div");
+    if (typeof title === 'string') {
+      const heading = document.createElement("div");
+      heading.classList.add("header");
+      heading.innerText = title;
+      div.appendChild(heading);
+    }
+    div.insertAdjacentHTML("beforeend", tableHTML);
+    return div;
   }
   /**
    * Returns an HTML div element containing parameter information, based on an array of arrays detailing their names, visual indexes, and CSS id attributes
@@ -261,12 +267,13 @@ const View = (argumentViewModel) => (function (vm) {
    * @returns {HTMLElement}
    */
   function prepareContent(content) {
+
     if (Array.isArray(content)) {
-      if (content.length === 2) { // potential contentTable args
+      if (content.length === 2) { // potential tableContainer args
         // validate "data" argument is two-dimensional
         const nonArrays = content[1].filter( arrayElement => Array.isArray(arrayElement) === false );
         if (Array.isArray(content[0]) && nonArrays.length === 0)
-          return contentTable(content[0], content[1]);
+          return tableContainer(content[0], content[1]);
       }
       return parametersContainer(content);
     }
