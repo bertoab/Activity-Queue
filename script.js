@@ -1,53 +1,52 @@
+// Independent functions that can be used across Model, ViewModel, and View.
+const helperLibrary = {
+  isObject(arg) {
+    typeof arg === 'object' &&
+    !Array.isArray(arg) &&
+    arg !== null
+  }
+};
+
 const Model = (function () {
   // Manage local storage (writing, reading, lookups using UUIDs, gather queryed Activity/Group info)
   const STORAGE_KEY = "activities";
   /**
    * Set (or clear) local storage
-   * @param {Array<Object>} activities - Array of activities to save locally. If non-array then an empty array is saved. 
+   * @param {Object} activities - Object of activities to save locally. If non-object then an empty object is saved. 
    */
   const setStore = (activities) => {
-    if (!Array.isArray(activities)) {
-      localStorage.setItem(STORAGE_KEY, []);
+    if (!helperLibrary.isObject(activities)) {
+      localStorage.setItem(STORAGE_KEY, {});
       return;
     }
     localStorage.setItem(STORAGE_KEY, activities);
   }
   /**
-   * Read local storage and return it's contents, or empty array if contents corrupted.
-   * @returns {Array<Object>} - Array of activities sorted in order determined by last user-set sort mode.
+   * Read local storage and return it's contents, or throw error if contents corrupted.
+   * @returns {Object} - Multi-level Object containing arrays of Activities with year, month, and day from "schedule" property as keys (or "loose" if some or all of these properties are omitted).
    */
   const getStore = () => {
     let data = localStorage.getItem(STORAGE_KEY);
     if (data === null) // uninitialized local storage
-      data = [];
-    if (!Array.isArray(data))
-      throw TypeError("Local storage data is non-array")
+      data = {};
+    else if (!helperLibrary.isObject(data))
+      throw TypeError("Local storage data is non-object")
     return data;
   }
 
   // runtime parameters
-  let sortedCreationActivities, activitiesIdMap, groupsIdMap,
-    groupActivitiesMap, sortedChronoActivities, uncheckedActivities;
+  let activitiesBySchedule, groupsIdMap,
+    groupActivitiesMap;
 
-  const fetched = getStore();
-  if (fetched.length === 0) {
-    sortedCreationActivities = [];
-    activitiesIdMap = {};
-    groupsIdMap = {};
-    groupActivitiesMap = {};
-    sortedChronoActivities = [];
-    uncheckedActivities = [];
-  } else {
-    sortedCreationActivities = fetched;
-    activitiesIdMap = Object.fromEntries(sortedCreationActivities.map(activity => [activity.id, activity]));
-    //...groupsIdMap = Object.fromEntries(...));
-    //...groupActivitiesMap = ...
-    sortedChronoActivities = new Array(sortedChronoActivities).sort((first, second) => first.creation - second.creation); // sorts with most recent at n-th index
-    uncheckedActivities = new Array(sortedChronoActivities).filter(activity => !activity.checked_off);
-  }
+  activitiesBySchedule = getStore();
+  //...groupsIdMap = Object.fromEntries(...));
+  //...groupActivitiesMap = ...
 
   return {
-
+    // newActivity(activity) {},
+    // updateActivity(activity, priorSchedule) {},
+    // deleteActivity(id) {},
+    // fetchActivitiesBySchedule(schedule) {}
   };
 })();
 
@@ -79,14 +78,13 @@ const ViewModel  = (argumentModel) => (function (m) {
       //TODO: "content" validation
       state.content = contextState.content;
     }
-    const isObject = (val) => (typeof val === 'object' && !Array.isArray(val));
     if (properties.indexOf("functionMapping") !== -1) {
-      if (!isObject(contextState.functionMapping))
+      if (!helperLibrary.isObject(contextState.functionMapping))
         throw new TypeError("unexpected context property type");
       state.functionMapping = contextState.functionMapping;
     }
     if (properties.indexOf("itemMapping") !== -1) {
-      if (!isObject(contextState.itemMapping))
+      if (!helperLibrary.isObject(contextState.itemMapping))
         throw new TypeError("unexpected context property type");
       state.itemMapping = contextState.itemMapping;
     }
