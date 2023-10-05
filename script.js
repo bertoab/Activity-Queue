@@ -1,7 +1,7 @@
 // Independent functions that can be used across Model, ViewModel, and View.
 const helperLibrary = {
   isObject(arg) {
-    typeof arg === 'object' &&
+    return typeof arg === 'object' &&
     !Array.isArray(arg) &&
     arg !== null
   }
