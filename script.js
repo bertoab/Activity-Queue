@@ -53,40 +53,47 @@ const Model = (function () {
 const ViewModel  = (argumentModel) => (function (m) {
   const model = m;
   const state = {};
+  const context = {};
   let updateView;
-
   /**
-   * Modify the application state based on properties of "contextState"; allowed to modify some or all state properties.
-   * @param {{type?: "main" | "modal", title?: string, content?: Array<Array<string>> | [Array<string>, Array<Array<string>>], functionMapping?: Object, itemMapping?: Object}} contextState - An object containing string keys that are ContextState properties and appropriate values
+   * Overwrite the application state based on properties of "updatedState"; allowed to overwrite some or all state properties. If "updatedState.contentContainers" exists, DOM will be re-rendered.
+   * @param {{functionMapping?: Object, itemMapping?: Object, contentContainers?: Array<Object>}} updatedState 
    */
-  function updateContext(contextState) {
-    const properties = Object.keys(contextState);
+  function updateState(updatedState) {
+    const properties = Object.keys(updatedState);
+    if (properties.includes("functionMapping")) {
+      if (!helperLibrary.isObject(updatedState.functionMapping))
+        throw new TypeError("unexpected state property type");
+      state.functionMapping = updatedState.functionMapping;
+    }
+    if (properties.includes("itemMapping")) {
+      if (!helperLibrary.isObject(updatedState.itemMapping))
+        throw new TypeError("unexpected state property type");
+      state.itemMapping = updatedState.itemMapping;
+    }
+    if (properties.includes("contentContainers")) {
+      state.contentContainers = updatedState.contentContainers;
+    }
+  }
+  /**
+   * Overwrite the application context based on properties of "updatedContext"; allowed to overwrite some or all context properties.
+   * @param {{type?: "main" | "modal", title?: string, content?: Array<Object>}} updatedContext - An object containing string keys that are application context properties and appropriate values
+   */
+  function updateContext(updatedContext) {
+    const properties = Object.keys(updatedContext);
     if (properties.indexOf("type") !== -1) {
-      const value = contextState.type;
-      if (typeof value !== 'string')
+      if (typeof updatedContext.type !== 'string')
         throw new TypeError("unexpected context property type");
-      if (["main", "modal"].includes(value) === false)
-        throw new Error("unexpected parameter value");
-      state.type = value;
+      context.type = updatedContext.type;
     }
     if (properties.indexOf("title") !== -1) {
-      if (typeof contextState.title !== 'string')
+      if (typeof updatedContext.title !== 'string')
         throw new TypeError("unexpected context property type");
-      state.title = contextState.title;
+      context.title = updatedContext.title;
     }
     if (properties.indexOf("content") !== -1) {
       //TODO: "content" validation
-      state.content = contextState.content;
-    }
-    if (properties.indexOf("functionMapping") !== -1) {
-      if (!helperLibrary.isObject(contextState.functionMapping))
-        throw new TypeError("unexpected context property type");
-      state.functionMapping = contextState.functionMapping;
-    }
-    if (properties.indexOf("itemMapping") !== -1) {
-      if (!helperLibrary.isObject(contextState.itemMapping))
-        throw new TypeError("unexpected context property type");
-      state.itemMapping = contextState.itemMapping;
+      context.content = updatedContext.content;
     }
 
     if (typeof updateView === 'function')
@@ -126,22 +133,48 @@ const ViewModel  = (argumentModel) => (function (m) {
     return [str, expectedInputStringArray];
   }
 
-  const mainMenuContext = {
-    type: "main",
-    title: "Main Menu",
-    content: [["Index", "Options"], ["Add task", "View history", "View archived"].map((optionName, index) => [index + 1, optionName])],
-    functionMapping: {
-      "1": () => document.getElementById("modal-container").style.display = "flex",
-      "2": () => alert("You selected: View history"),
-      "3": () => alert("You selected: View archived"),
+  const mainMenu = {
+    state: {
+      contentContainers: [{
+        type: "table",
+        title: undefined,
+        columnNames: ["Options"],
+        data: [["Add task"], ["View history"], ["View archived"]],
+        functions: [() => document.getElementById("modal-container").style.display = "flex", () => alert("You selected: View history"), () => alert("You selected: View archived")],
+        isLiteralData: true,
+        startingVisualIndex: 1,
+        currentPageIndex: 0,
+        maxPageItems: 15
+      }],
+      functionMapping: {
+        "1": () => document.getElementById("modal-container").style.display = "flex",
+        "2": () => alert("You selected: View history"),
+        "3": () => alert("You selected: View archived"),
+      }
+    },
+    context: {
+      type: "main",
+      title: "Main Menu",
+      content: [
+        {
+          type: "table",
+          title: undefined,
+          columnNames: ["Index", "Options"],
+          currentPage: "1",
+          lastPageNumber: "1",
+          data: [["1", "Add task"], ["2", "View history"], ["3", "View archived"]]
+        }
+      ]
     }
   };
   // initialize state to main menu context
-  Object.assign(state, mainMenuContext);
+  updateContext(mainMenu.context);
+  updateState(mainMenu.state);
 
   return {
+    context: context,
     state: state,
-    mainMenuContext: mainMenuContext, // for testing
+    mainMenu: mainMenu, // for testing
     /**
      * Parse user input for a corresponding user function acronym string, and execute; accessible user functions are determined by current application state.
      * @param {Event} event - The Event object passed from the fired event listener
@@ -259,28 +292,17 @@ const View = (argumentViewModel) => (function (vm) {
     return container;
   }
   /**
-   * Accepts "content" property of application state and returns the appropriately formatted HTMLElement to display as the main content
-   * @param {Array} param1 
-   * @param {Array | undefined} param2 
+   * Accepts "content" property of application context and returns the appropriately formatted HTMLElement to display as the main content
+   * @param {Array} content
    * @returns {HTMLElement}
    */
   function prepareContent(content) {
-
-    if (Array.isArray(content)) {
-      if (content.length === 2) { // potential tableContainer args
-        // validate "data" argument is two-dimensional
-        const nonArrays = content[1].filter( arrayElement => Array.isArray(arrayElement) === false );
-        if (Array.isArray(content[0]) && nonArrays.length === 0)
-          return tableContainer(content[0], content[1]);
-      }
-      return parametersContainer(content);
-    }
-    if (typeof content === 'string') {
-      const paragraph = document.createElement("p");
-      paragraph.innerText = content;
-      return paragraph;
-    }
-
+    //TODO: iterate "content" to support multiple containers in one context
+    const container = content[0];
+    if (container.type === "table")
+      return tableContainer(container.columnNames, container.data, container.title);
+    if (container.type === "parameters")
+      return parametersContainer(container.data);
     throw new TypeError("unexpected parameter type");
   }
   /**
@@ -301,15 +323,15 @@ const View = (argumentViewModel) => (function (vm) {
   }
 
   /**
-   * Draw the current application state to the screen. Removes all elements from the corresponding context div before drawing
+   * Draw the current application context to the screen. Removes all elements from the current context div (determined by "type" context property) before drawing
    */
   function render() {
     // select context div
     let contextDiv;
-    if (viewModel.state.type === "main") {
+    if (viewModel.context.type === "main") {
       contextDiv = document.getElementById("main");
       document.getElementById("modal-container").style.display = "none";
-    } else if (viewModel.state.type === "modal") {
+    } else if (viewModel.context.type === "modal") {
       contextDiv = document.getElementById("modal");
       document.getElementById("modal-container").style.display = "flex";
     }
@@ -319,8 +341,8 @@ const View = (argumentViewModel) => (function (vm) {
     while (contextDiv.firstChild)
       contextDiv.removeChild(contextDiv.firstChild);
     // draw
-    contextDiv.appendChild(createHeader(viewModel.state.title));
-    contextDiv.appendChild(prepareContent(viewModel.state.content));
+    contextDiv.appendChild(createHeader(viewModel.context.title));
+    contextDiv.appendChild(prepareContent(viewModel.context.content));
     const funcBar = FunctionBar(); // define as variable to set cursor focus
     contextDiv.appendChild(funcBar);
     funcBar.firstChild.focus();
