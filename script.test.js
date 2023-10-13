@@ -46,12 +46,17 @@ describe('ViewModel', () => {
      * @param {object} testMapping The functionMapping object to be applied after resetting context
      */
     const assertErrorContextAndReset = function(expectedErrorMessage, testMapping) {
-      expect(viewModel.state).toEqual(expect.objectContaining({
+      expect(viewModel.context).toEqual(expect.objectContaining({
         type: "modal",
         title: "Error",
-        content: expectedErrorMessage
+        content: [{
+            type: "table",
+            columnNames: ["Message(s)"],
+            data: [[expectedErrorMessage]]
+          }]
       }));
-      Object.assign(viewModel.state, viewModel.mainMenuContext);
+      Object.assign(viewModel.state, viewModel.mainMenu.state);
+      Object.assign(viewModel.context, viewModel.mainMenu.context);
       viewModel.state.functionMapping = testMapping;
     };
 

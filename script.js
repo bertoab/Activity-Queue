@@ -110,7 +110,11 @@ const ViewModel  = (argumentModel) => (function (m) {
     return {
       type: "modal",
       title: "Error",
-      content: message
+      content: [{
+        type: "table",
+        columnNames: ["Message(s)"],
+        data: [[message]]
+      }]
     };
   }
 
