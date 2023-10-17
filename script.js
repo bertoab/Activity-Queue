@@ -28,7 +28,7 @@ const Model = (function () {
   const getActivitiesStore = () => {
     let loadedData = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
     if (loadedData === null) // uninitialized local storage
-      loadedData = {};
+      return {};
     else if (!helperLibrary.isObject(loadedData))
       throw TypeError("Local storage data is non-object")
     return loadedData;
