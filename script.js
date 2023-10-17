@@ -261,12 +261,8 @@ const View = (argumentViewModel) => (function (vm) {
     tableHTML += `</tbody>
     </table>`;
     const container = document.createElement("div");
-    if (typeof title === 'string') {
-      const heading = document.createElement("div");
-      heading.classList.add("header");
-      heading.innerText = title;
-      container.appendChild(heading);
-    }
+    if (typeof title === 'string')
+      container.appendChild(createHeader(title));
     container.insertAdjacentHTML("beforeend", tableHTML);
     return container;
   }
