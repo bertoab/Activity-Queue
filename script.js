@@ -9,38 +9,38 @@ const helperLibrary = {
 
 const Model = (function () {
   // Manage local storage (writing, reading, lookups using UUIDs, gather queryed Activity/Group info)
-  const STORAGE_KEY = "activities";
+  const ACTIVITIES_STORAGE_KEY = "activities";
   /**
    * Set (or clear) local storage
    * @param {Object} activities - Object of activities to save locally. If non-object then an empty object is saved. 
    */
-  const setStore = (activities) => {
-    if (!helperLibrary.isObject(activities)) {
-      localStorage.setItem(STORAGE_KEY, {});
+  const setActivitiesStore = (schedulePropertiesMappedToActivityObjects) => {
+    if (!helperLibrary.isObject(schedulePropertiesMappedToActivityObjects)) {
+      localStorage.setItem(ACTIVITIES_STORAGE_KEY, {});
       return;
     }
-    localStorage.setItem(STORAGE_KEY, activities);
+    localStorage.setItem(ACTIVITIES_STORAGE_KEY, schedulePropertiesMappedToActivityObjects);
   }
   /**
-   * Read local storage and return it's contents, or throw error if contents corrupted.
-   * @returns {Object} - Multi-level Object containing arrays of Activities with year, month, and day from "schedule" property as keys (or "loose" if some or all of these properties are omitted).
+   * Read local storage and return its contents, or throw error if contents corrupted.
+   * @returns {Object} - Multi-level object containing arrays of Activities with year, month, and day from "schedule" property as keys (or "loose" if some or all of these properties are omitted)
    */
-  const getStore = () => {
-    let data = localStorage.getItem(STORAGE_KEY);
-    if (data === null) // uninitialized local storage
-      data = {};
-    else if (!helperLibrary.isObject(data))
+  const getActivitiesStore = () => {
+    let loadedData = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
+    if (loadedData === null) // uninitialized local storage
+      loadedData = {};
+    else if (!helperLibrary.isObject(loadedData))
       throw TypeError("Local storage data is non-object")
-    return data;
+    return loadedData;
   }
 
   // runtime parameters
-  let activitiesBySchedule, groupsIdMap,
-    groupActivitiesMap;
+  let schedulePropertiesMappedToActivityObjects, groupIdsMappedToGroupObjects,
+    groupIdsMappedToActivityIds;
 
-  activitiesBySchedule = getStore();
-  //...groupsIdMap = Object.fromEntries(...));
-  //...groupActivitiesMap = ...
+  schedulePropertiesMappedToActivityObjects = getActivitiesStore();
+  //...groupIdsMappedToGroupObjects = Object.fromEntries(...));
+  //...groupIdsMappedToActivityIds = ...
 
   return {
     // newActivity(activity) {},
@@ -55,50 +55,52 @@ const ViewModel  = (argumentModel) => (function (m) {
   const state = {};
   const context = {};
   let updateView;
+  // Change application state/context
   /**
-   * Overwrite the application state based on properties of "updatedState"; allowed to overwrite some or all state properties. If "updatedState.contentContainers" exists, DOM will be re-rendered.
-   * @param {{functionMapping?: Object, itemMapping?: Object, contentContainers?: Array<Object>}} updatedState 
+   * Overwrite the application state based on properties of "stateChangeObject"; allowed to overwrite some or all state properties. If "stateChangeObject.contentContainers" exists, DOM will be re-rendered.
+   * @param {{functionMapping?: Object, itemMapping?: Object, contentContainers?: Array<Object>}} stateChangeObject - An object containing string keys that are application state properties and appropriate values
    */
-  function updateState(updatedState) {
-    const properties = Object.keys(updatedState);
+  function updateState(stateChangeObject) {
+    const properties = Object.keys(stateChangeObject);
     if (properties.includes("functionMapping")) {
-      if (!helperLibrary.isObject(updatedState.functionMapping))
+      if (!helperLibrary.isObject(stateChangeObject.functionMapping))
         throw new TypeError("unexpected state property type");
-      state.functionMapping = updatedState.functionMapping;
+      state.functionMapping = stateChangeObject.functionMapping;
     }
     if (properties.includes("itemMapping")) {
-      if (!helperLibrary.isObject(updatedState.itemMapping))
+      if (!helperLibrary.isObject(stateChangeObject.itemMapping))
         throw new TypeError("unexpected state property type");
-      state.itemMapping = updatedState.itemMapping;
+      state.itemMapping = stateChangeObject.itemMapping;
     }
     if (properties.includes("contentContainers")) {
-      state.contentContainers = updatedState.contentContainers;
+      state.contentContainers = stateChangeObject.contentContainers;
     }
   }
   /**
-   * Overwrite the application context based on properties of "updatedContext"; allowed to overwrite some or all context properties.
-   * @param {{type?: "main" | "modal", title?: string, content?: Array<Object>}} updatedContext - An object containing string keys that are application context properties and appropriate values
+   * Overwrite the application context based on properties of "contextChangeObject"; allowed to overwrite some or all context properties.
+   * @param {{type?: "main" | "modal", title?: string, content?: Array<Object>}} contextChangeObject - An object containing string keys that are application context properties and appropriate values
    */
-  function updateContext(updatedContext) {
-    const properties = Object.keys(updatedContext);
+  function updateContext(contextChangeObject) {
+    const properties = Object.keys(contextChangeObject);
     if (properties.indexOf("type") !== -1) {
-      if (typeof updatedContext.type !== 'string')
+      if (typeof contextChangeObject.type !== 'string')
         throw new TypeError("unexpected context property type");
-      context.type = updatedContext.type;
+      context.type = contextChangeObject.type;
     }
     if (properties.indexOf("title") !== -1) {
-      if (typeof updatedContext.title !== 'string')
+      if (typeof contextChangeObject.title !== 'string')
         throw new TypeError("unexpected context property type");
-      context.title = updatedContext.title;
+      context.title = contextChangeObject.title;
     }
     if (properties.indexOf("content") !== -1) {
       //TODO: "content" validation
-      context.content = updatedContext.content;
+      context.content = contextChangeObject.content;
     }
 
     if (typeof updateView === 'function')
       updateView();
   }
+  // Generate contexts
   /**
    * Return a context object for an error. The context is a modal type with the title "Error" and the passed message as the content.
    * @param {string} message - The error message to be displayed
@@ -117,26 +119,26 @@ const ViewModel  = (argumentModel) => (function (m) {
       }]
     };
   }
-
+  // FunctionBar
   /**
-   * Search for all members of "expectedInputStringArray" within "str". The first occurring member within "expectedInputStringArray" is removed from "str".
+   * Search for all members of "strsToMatch" within "str". The first occurring member of "strsToMatch" is removed from "str". Assumes all strings in "strsToMatch" are uppercase.
    * @param {string} str - The string to be searched
-   * @param {Array<string>} expectedInputStringArray - An array of strings to be searched for in "str"
+   * @param {Array<string>} strsToMatch - An array of strings to be searched for in "str"
    * @returns {[string, Array<string>]} - A tuple; index 0 contains "str" after the first matched string has been removed & index 1 contains an array of each matched string
    */
-  function searchForMatches(str, expectedInputStringArray) {
-    if (!Array.isArray(expectedInputStringArray))
+  function removeFirstMatchAndReturnOrderedMatches(str, strsToMatch) {
+    if (!Array.isArray(strsToMatch))
       throw new TypeError("unexpected parameter type");
 
     str = str.toUpperCase();
-    expectedInputStringArray.sort( (a, b) => b.length - a.length ); // highest length first
-    expectedInputStringArray = expectedInputStringArray.filter( val => str.includes(val) ); // remove strings not present in str
-    expectedInputStringArray.sort( (a, b) => str.indexOf(a) - str.indexOf(b) ); // earliest occurrence in str first
-    str = str.replace(expectedInputStringArray[0], ""); // remove earliest occurring string from str
+    strsToMatch.sort( (a, b) => b.length - a.length ); // highest length first
+    strsToMatch = strsToMatch.filter( val => str.includes(val) ); // remove strings not present in str
+    strsToMatch.sort( (a, b) => str.indexOf(a) - str.indexOf(b) ); // earliest occurrence in str first
+    str = str.replace(strsToMatch[0], ""); // remove earliest occurring string from str
 
-    return [str, expectedInputStringArray];
+    return [str, strsToMatch];
   }
-
+  // Hard-coded state/context objects
   const mainMenu = {
     state: {
       contentContainers: [{
@@ -175,19 +177,20 @@ const ViewModel  = (argumentModel) => (function (m) {
   updateContext(mainMenu.context);
   updateState(mainMenu.state);
 
+  // Public definitions
   return {
     context: context,
     state: state,
     mainMenu: mainMenu, // for testing
     /**
-     * Parse user input for a corresponding user function acronym string, and execute; accessible user functions are determined by current application state.
+     * Check for "Enter" keypress, then trim and split input string by comma (",") delimiter, then remove first matched acronym string (from state.functionMapping) in the input, then ensure remaining characters in first delimited string are digits, then execute matched user function with split input string array as arguments
      * @param {Event} event - The Event object passed from the fired event listener
      */
-    validateUserFunction(event) {
+    handleFunctionBarKeypressEventAndExecuteUserFunction(event) {
       let inputArray = event.target.value.split(",").map(str => str.trim()); // split raw input by "," delimiter and trim trailing whitespace
       if (event.key === 'Enter') { // validate for a user function
         let matchedFunctions;
-        [inputArray[0], matchedFunctions] = searchForMatches(inputArray[0], Object.keys(state.functionMapping));
+        [inputArray[0], matchedFunctions] = removeFirstMatchAndReturnOrderedMatches(inputArray[0], Object.keys(state.functionMapping));
         if (matchedFunctions.length !== 0) {
           if (inputArray[0] === "")
             inputArray.shift();
@@ -200,6 +203,10 @@ const ViewModel  = (argumentModel) => (function (m) {
         } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
       }
     },
+    /**
+     * Set the function used by the ViewModel to request a DOM update. If it has not been defined previously, then it will be executed (for initial DOM render).
+     * @param {Function} func 
+     */
     setUpdateView(func) {
       if (typeof updateView === 'undefined')
         func();
@@ -215,7 +222,7 @@ const View = (argumentViewModel) => (function (vm) {
   viewModel.setUpdateView(render);
   
   /**
-   * Creates a styled "div" for a header
+   * Create a styled "div" for a header
    * @param {string} value - The title string to display in the header
    * @returns {HTMLElement} - The "div" element
    */
@@ -228,9 +235,9 @@ const View = (argumentViewModel) => (function (vm) {
     return headerDiv;
   }
   /**
-   * Returns an HTML table element based on an array of arrays, accepting a single-layer array for the columns and a two-layer array for the data 
-   * @param {Array<string>} cols - an array of strings to name the table columns
-   * @param {Array<Array<string>>} data - a two-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
+   * Return a div containing an HTML table element based on an array of arrays, accepting a single-layer array for the columns and a two-layer array for the data 
+   * @param {Array<string>} cols - An array of strings to name the table columns
+   * @param {Array<Array<string>>} data - A two-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
    * @returns {HTMLElement}
    */
   function tableContainer(cols, data, title) {
@@ -253,42 +260,42 @@ const View = (argumentViewModel) => (function (vm) {
     }
     tableHTML += `</tbody>
     </table>`;
-    const div = document.createElement("div");
+    const container = document.createElement("div");
     if (typeof title === 'string') {
       const heading = document.createElement("div");
       heading.classList.add("header");
       heading.innerText = title;
-      div.appendChild(heading);
+      container.appendChild(heading);
     }
-    div.insertAdjacentHTML("beforeend", tableHTML);
-    return div;
+    container.insertAdjacentHTML("beforeend", tableHTML);
+    return container;
   }
   /**
-   * Returns an HTML div element containing parameter information, based on an array of arrays detailing their names, visual indexes, and CSS id attributes
-   * @param {Array<Array<string>} parametersArray - two-layer array; the inner arrays must contain either a single string value or 3 values, where the first index is a string corresponding to the name of the parameter, the second index is a string that is the visual index value of the parameter, and the third index is a string that is the id CSS attribute of the input element for the parameter
+   * Return an HTML div element containing parameter information, based on an array of arrays detailing their names, visual string indexes, and CSS id attributes
+   * @param {Array<Array<string>} parameterData - Two-layer array; the inner arrays must contain either a single string value or 3 values, where the first index is a string corresponding to the name of the parameter, the second index is a string that is the visual index value of the parameter, and the third index is a string that is the id CSS attribute of the input element for the parameter
    * @returns {HTMLElement}
    */
-  function parametersContainer(parametersArray) {
+  function parametersContainer(parameterData) {
     // validate argument
-    if (!Array.isArray(parametersArray))
+    if (!Array.isArray(parameterData))
       throw new TypeError("unexpected parameter type");
-    for (const element of parametersArray) {
+    for (const element of parameterData) {
       if (!Array.isArray(element) || element.length === 2 || element.length > 3)
         throw new TypeError("unexpected parameter type");
     };
 
     const container = document.createElement("div");
     container.classList.add("parameters-container");
-    for (const parameterDetails of parametersArray) {
+    for (const parameter of parameterData) {
       const parameterDiv = document.createElement("div");
       parameterDiv.classList.add("parameter");
       const label = document.createElement("p");
-      label.innerText = parameterDetails.length === 3 ? `${parameterDetails[1]}. ${parameterDetails[0]}` : label.innerText = parameterDetails[0];
+      label.innerText = parameter.length === 3 ? `${parameter[1]}. ${parameter[0]}` : label.innerText = parameter[0];
       parameterDiv.appendChild(label);
-      if (parameterDetails.length === 3) {
+      if (parameter.length === 3) {
         const input = document.createElement("input");
         input.type = "text";
-        input.setAttribute("id", parameterDetails[2]);
+        input.setAttribute("id", parameter[2]);
         parameterDiv.appendChild(input);
       }
       container.appendChild(parameterDiv);
@@ -296,11 +303,11 @@ const View = (argumentViewModel) => (function (vm) {
     return container;
   }
   /**
-   * Accepts "content" property of application context and returns the appropriately formatted HTMLElement to display as the main content
+   * Accept "content" property of application context and return the appropriately formatted HTMLElement to display as the main content
    * @param {Array} content
    * @returns {HTMLElement}
    */
-  function prepareContent(content) {
+  function createContentDiv(content) {
     //TODO: iterate "content" to support multiple containers in one context
     const container = content[0];
     if (container.type === "table")
@@ -310,10 +317,10 @@ const View = (argumentViewModel) => (function (vm) {
     throw new TypeError("unexpected parameter type");
   }
   /**
-   * Creates HTML elements for the FunctionBar component and attaches a "keypress" listener to validate and execute on input via a ViewModel callback function.
+   * Create HTML elements for the FunctionBar component and attach a "keypress" listener to validate and execute on input (via a ViewModel callback function)
    * @returns {HTMLElement} - The "div" element, containing the "input" element
    */
-  function FunctionBar() {
+  function createFunctionBarAndAttachKeyPressHandler() {
     // Create necessary HTMLElements
     const div = document.createElement("div");
     div.classList.add("function-bar");
@@ -321,13 +328,13 @@ const View = (argumentViewModel) => (function (vm) {
     input.type = "text";
     div.appendChild(input);
     // Set up event listener
-    input.addEventListener("keypress", viewModel.validateUserFunction);
+    input.addEventListener("keypress", viewModel.handleFunctionBarKeypressEventAndExecuteUserFunction);
   
     return div;
   }
 
   /**
-   * Draw the current application context to the screen. Removes all elements from the current context div (determined by "type" context property) before drawing
+   * Draw the current application context to the screen. Remove all elements from the current context div (determined by "type" context property) before drawing
    */
   function render() {
     // select context div
@@ -346,8 +353,8 @@ const View = (argumentViewModel) => (function (vm) {
       contextDiv.removeChild(contextDiv.firstChild);
     // draw
     contextDiv.appendChild(createHeader(viewModel.context.title));
-    contextDiv.appendChild(prepareContent(viewModel.context.content));
-    const funcBar = FunctionBar(); // define as variable to set cursor focus
+    contextDiv.appendChild(createContentDiv(viewModel.context.content));
+    const funcBar = createFunctionBarAndAttachKeyPressHandler(); // define as variable to set cursor focus
     contextDiv.appendChild(funcBar);
     funcBar.firstChild.focus();
   }
