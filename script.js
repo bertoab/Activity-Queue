@@ -180,8 +180,10 @@ const ViewModel  = (argumentModel) => (function (m) {
   // Public definitions
   return {
     context: context,
-    state: state,
-    mainMenu: mainMenu, // for testing
+    debug: {
+      state: state,
+      mainMenu: mainMenu
+    },
     /**
      * Check for "Enter" keypress, then trim and split input string by comma (",") delimiter, then remove first matched acronym string (from state.functionMapping) in the input, then ensure remaining characters in first delimited string are digits, then execute matched user function with split input string array as arguments
      * @param {Event} event - The Event object passed from the fired event listener
@@ -214,8 +216,6 @@ const ViewModel  = (argumentModel) => (function (m) {
     }
   };
 })(argumentModel);
-
-const viewModel = ViewModel(Model);
 
 const View = (argumentViewModel) => (function (vm) {
   const viewModel = vm;
@@ -357,7 +357,6 @@ const View = (argumentViewModel) => (function (vm) {
 
 })(argumentViewModel);
 
-const view = View(viewModel);
 
 // Linked list implementation
 class Node {
@@ -441,9 +440,12 @@ class LinkedList {
   }
 }
 
-// Support module
+// Define module exports else initialize application when run as main script
 if (typeof exports === 'object') {
   exports.Model = Model;
   exports.ViewModel = ViewModel;
   exports.View = View;
+} else {
+  const viewModel = ViewModel(Model);
+  const view = View(viewModel);
 }
