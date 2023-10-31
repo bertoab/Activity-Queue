@@ -48,17 +48,17 @@ const Model = (function () {
    */
   const setActivitiesStore = (schedulePropertiesMappedToActivityObjects) => {
     if (!helperLibrary.isObject(schedulePropertiesMappedToActivityObjects)) {
-      localStorage.setItem(ACTIVITIES_STORAGE_KEY, {});
+      localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify({}));
       return;
     }
-    localStorage.setItem(ACTIVITIES_STORAGE_KEY, schedulePropertiesMappedToActivityObjects);
+    localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(schedulePropertiesMappedToActivityObjects));
   }
   /**
    * Read local storage and return its contents, or throw error if contents corrupted.
    * @returns {ScheduleToActivitiesTree}
    */
   const getActivitiesStore = () => {
-    let loadedData = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
+    let loadedData = JSON.parse(localStorage.getItem(ACTIVITIES_STORAGE_KEY));
     if (loadedData === null) // uninitialized local storage
       return {};
     else if (!helperLibrary.isObject(loadedData))
