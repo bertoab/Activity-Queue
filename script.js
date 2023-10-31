@@ -7,12 +7,44 @@ const helperLibrary = {
   }
 };
 
+/**
+ * @typedef {{
+ * year?: number,
+ * month?: number,
+ * day?: number,
+ * hour?: number,
+ * minute?: number
+ * }} Schedule
+ *
+ * @typedef {{
+ * id: string,
+ * creation: string,
+ * name?: string,
+ * checked_off?: boolean,
+ * schedule?: Schedule
+ * }} Activity
+ */
+
 const Model = (function () {
+  /**
+   * @typedef {Object} DaysToActivitiesMap
+   * @property {Array<Activity>} $day $day is an integer between 1 - 31
+   * @property {Array<Activity>} loose Activities without a valid schedule.day property
+   *
+   * @typedef {Object} MonthsAndDaysToActivitiesTree
+   * @property {DaysToActivitiesMap} $month $month is an integer between 1 - 12
+   * @property {Array<Activity>} loose Activities without a valid schedule.month property
+   *
+   * @typedef {Object} ScheduleToActivitiesTree Multi-level object containing arrays of Activities with year, month, and day from "schedule" property as keys (or "loose" if some or all of these properties are omitted)
+   * @property {MonthsAndDaysToActivitiesTree} $year A 4 digit integer
+   * @property {Array<Activity>} loose Activities without a valid schedule.year property
+   */
+
   // Manage local storage (writing, reading, lookups using UUIDs, gather queryed Activity/Group info)
   const ACTIVITIES_STORAGE_KEY = "activities";
   /**
    * Set (or clear) local storage
-   * @param {Object} activities - Object of activities to save locally. If non-object then an empty object is saved. 
+   * @param {ScheduleToActivitiesTree?} schedulePropertiesMappedToActivityObjects - If non-object then an empty object is saved.
    */
   const setActivitiesStore = (schedulePropertiesMappedToActivityObjects) => {
     if (!helperLibrary.isObject(schedulePropertiesMappedToActivityObjects)) {
@@ -23,7 +55,7 @@ const Model = (function () {
   }
   /**
    * Read local storage and return its contents, or throw error if contents corrupted.
-   * @returns {Object} - Multi-level object containing arrays of Activities with year, month, and day from "schedule" property as keys (or "loose" if some or all of these properties are omitted)
+   * @returns {ScheduleToActivitiesTree}
    */
   const getActivitiesStore = () => {
     let loadedData = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
