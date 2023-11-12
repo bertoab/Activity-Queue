@@ -4,6 +4,7 @@
 
 let script;
 let model, viewModel, view;
+let STORAGE_KEY;
 
 beforeAll(() => {
 	// set up DOM
@@ -20,12 +21,145 @@ beforeAll(() => {
   // load module
   script = require('./script');
   model = script.Model;
+  STORAGE_KEY = model.debug.ACTIVITIES_STORAGE_KEY;
   viewModel = script.ViewModel(model);
   view = script.View(viewModel); // side-effect (DOM modification)
 });
 
 describe('Model', () => {
   describe('data management', () => {
+    /**
+     * Reset LocalStorage content. If "newContent" is a string, content is set to that value. Otherwise it is set to null.
+     */
+    const resetStorage = function(newContent) {
+      if (typeof newContent === 'string')
+        return localStorage.setItem(STORAGE_KEY, newContent)
+      return localStorage.removeItem(STORAGE_KEY);
+    }
+    /**
+     * Read content of LocalStorage, parse as a JSON string, and return parsed result.
+     */
+    const getParsedStorage = function() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY));
+    }
+    describe('setActivitiesStore', () => {
+      test("when passed a non-object parameter, ignore it and set storage to an empty object JSON string", () => {
+        // setup
+        resetStorage();
+        // run 1
+        let testParameter = undefined;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 2
+        testParameter = null;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 3
+        testParameter = NaN;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 4
+        testParameter = 12;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 5
+        testParameter = 298930839013901;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 6
+        testParameter = true;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 7
+        testParameter = false;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 8
+        testParameter = Symbol();
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 9
+        testParameter = "{ helloWorld: 'Hello World' }";
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 10
+        testParameter = `[ "helloWorld", "Hello World" ]`;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+        // run 11
+        testParameter = `123`;
+        model.debug.setActivitiesStore(testParameter);
+        expect(getParsedStorage()).toEqual({});
+      });
+      test("when passed an object parameter, set storage to JSON stringified version of it", () => {
+        // setup
+        resetStorage();
+        // run 1
+        let testObject = {
+          prop1: "string",
+          prop2: 321,
+          prop3: false,
+          prop4: { prop1: null },
+          prop5: [ true, 3, "another string"],
+        }
+        model.debug.setActivitiesStore(testObject);
+        expect(getParsedStorage()).toEqual(testObject);
+        // run 2
+        testObject = {};
+        model.debug.setActivitiesStore(testObject);
+        expect(getParsedStorage()).toEqual(testObject);
+      });
+    });
+    describe('getActivitiesStore', () => {
+      test("when storage content successfully parses to non-object, throw a TypeError", () => {
+        // run 1
+        resetStorage("345");
+        expect(model.debug.getActivitiesStore).toThrow(TypeError);
+        // run 2
+        resetStorage("[]");
+        expect(model.debug.getActivitiesStore).toThrow(TypeError);
+        // run 3
+        resetStorage(`"hello world"`);
+        expect(model.debug.getActivitiesStore).toThrow(TypeError);
+        // run 4
+        resetStorage("true");
+        expect(model.debug.getActivitiesStore).toThrow(TypeError);
+      });
+      test("when storage is uninitialized, return an empty object", () => {
+        // run 1
+        resetStorage();
+        expect(model.debug.getActivitiesStore()).toEqual({});
+      });
+      test("when storage cannot be parsed as JSON, throw a SyntaxError", () => {
+        // run 1
+        resetStorage("'hello world'");
+        expect(model.debug.getActivitiesStore).toThrow(SyntaxError);
+        // run 2
+        resetStorage("\\ \'");
+        expect(model.debug.getActivitiesStore).toThrow(SyntaxError);
+        // run 3
+        resetStorage("hello world");
+        expect(model.debug.getActivitiesStore).toThrow(SyntaxError);
+        // run 4
+        resetStorage("undefined");
+        expect(model.debug.getActivitiesStore).toThrow(SyntaxError);
+        // run 5
+        resetStorage(`{ "almost": "a correct object }`);
+        expect(model.debug.getActivitiesStore).toThrow(SyntaxError);
+      });
+      test("when storage content successfully parses as an object, return it", () => {
+        // run 1
+        let testObject = {
+          prop1: "string",
+          prop2: 321,
+          prop3: false,
+          prop4: { prop1: null },
+          prop5: [ true, 3, "another string"],
+        }; // these are the ONLY types able to be stringified by JSON; property keys or values that are not any of these will be silently ignored by JSON parsing function
+        resetStorage(JSON.stringify(testObject));
+        expect(model.debug.getActivitiesStore()).toEqual(testObject)
+      });
+    });
   });
 });
 describe('ViewModel', () => {

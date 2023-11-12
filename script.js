@@ -79,6 +79,11 @@ const Model = (function () {
     // updateActivity(activity, priorSchedule) {},
     // deleteActivity(id) {},
     // fetchActivitiesBySchedule(schedule) {}
+    debug: {
+      setActivitiesStore: setActivitiesStore,
+      getActivitiesStore: getActivitiesStore,
+      ACTIVITIES_STORAGE_KEY: ACTIVITIES_STORAGE_KEY
+    }
   };
 })();
 
