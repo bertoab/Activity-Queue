@@ -40,8 +40,9 @@ const Model = (function () {
    * @property {Array<Activity>} loose Activities without a valid schedule.year property
    */
 
-  // Manage local storage (writing, reading, lookups using UUIDs, gather queryed Activity/Group info)
   const ACTIVITIES_STORAGE_KEY = "activities";
+  const uniqueIds = new Set();
+  // Manage local storage
   /**
    * Set (or clear) local storage
    * @param {ScheduleToActivitiesTree?} schedulePropertiesMappedToActivityObjects - If non-object then an empty object is saved.
@@ -64,6 +65,18 @@ const Model = (function () {
     else if (!helperLibrary.isObject(loadedData))
       throw TypeError("Local storage data is non-object")
     return loadedData;
+  }
+  // Manage UUIDs
+  /**
+   * Return a string id that is unique among all those currently in localStorage. Uses private "uniqueIds" Set object to track used ids.
+   * @returns {string}
+   */
+  function getUniqueId() {
+    let id = crypto.randomUUID();
+    while (uniqueIds.has(id))
+      id = crypto.randomUUID();
+    uniqueIds.add(id);
+    return id;
   }
 
   // runtime parameters
