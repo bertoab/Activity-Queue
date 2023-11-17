@@ -160,6 +160,10 @@ describe('Model', () => {
         expect(model.debug.getActivitiesStore()).toEqual(testObject)
       });
     });
+    describe('flattenScheduleTreeToActivitiesArray', () => {
+      test.todo("when passed a valid ScheduleToActivitiesTree, return array of all Activities within");
+      test.todo("when passed a non-object, throw a TypeError");
+    });
   });
 });
 describe('ViewModel', () => {

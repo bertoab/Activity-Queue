@@ -66,6 +66,29 @@ const Model = (function () {
       throw TypeError("Local storage data is non-object")
     return loadedData;
   }
+  // Manage data structures
+  /**
+   * Traverse through "scheduleTree" and collect any Activities. Traverses from earliest scheduled Activity to latest (then "loose").
+   * @param {ScheduleToActivitiesTree} scheduleTree
+   * @returns {Array<Activity>}
+   */
+  function flattenScheduleTreeToActivitiesArray (scheduleTree) {
+    let activitiesArray = [];
+    recurseAndPushActivities(scheduleTree, activitiesArray);
+    return activitiesArray;
+
+    /** Iterate over values of "obj", recursing if another object is found or pushing values to "arr" if an array is found. */
+    function recurseAndPushActivities(obj, arr) {
+      Object.values(obj).map( (value) => {
+        if (helperLibrary.isObject(value)) {
+          recurseAndPushActivities(value, arr);
+        }
+        if (Array.isArray(value)) {
+          arr.push(...value);
+        }
+      });
+    }
+  }
   // Manage UUIDs
   /**
    * Return a string id that is unique among all those currently in localStorage. Uses private "uniqueIds" Set object to track used ids.
