@@ -63,7 +63,7 @@ const Model = (function () {
     if (loadedData === null) // uninitialized local storage
       return {};
     else if (!helperLibrary.isObject(loadedData))
-      throw TypeError("Local storage data is non-object")
+      throw new TypeError("Local storage data is non-object")
     return loadedData;
   }
   // Manage data structures
