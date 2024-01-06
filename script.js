@@ -295,15 +295,14 @@ const View = (argumentViewModel) => (function (vm) {
   viewModel.setUpdateView(render);
   
   /**
-   * Create a styled "div" for a header
-   * @param {string} value - The title string to display in the header
-   * @returns {HTMLElement} - The "div" element
+   * Create a styled "h2"
+   * @param {string} value - The title string to display in the heading
+   * @returns {HTMLElement} - The "h2" element
    */
-  function createHeader(value) {
+  function createHeading(value) {
     if (typeof value !== 'string')
       throw new TypeError("unexpected parameter type"); //TODO: implement support for Array<HTMLElement>
-    const headerDiv = document.createElement("div");
-    headerDiv.classList.add("header");
+    const headerDiv = document.createElement("h2");
     headerDiv.innerText = value;
     return headerDiv;
   }
@@ -335,7 +334,7 @@ const View = (argumentViewModel) => (function (vm) {
     </table>`;
     const container = document.createElement("div");
     if (typeof title === 'string')
-      container.appendChild(createHeader(title));
+      container.appendChild(createHeading(title));
     container.insertAdjacentHTML("beforeend", tableHTML);
     return container;
   }
@@ -421,7 +420,7 @@ const View = (argumentViewModel) => (function (vm) {
     while (contextDiv.firstChild)
       contextDiv.removeChild(contextDiv.firstChild);
     // draw
-    contextDiv.appendChild(createHeader(viewModel.context.title));
+    contextDiv.appendChild(createHeading(viewModel.context.title));
     contextDiv.appendChild(createContentDiv(viewModel.context.content));
     const funcBar = createFunctionBarAndAttachKeyPressHandler(); // define as variable to set cursor focus
     contextDiv.appendChild(funcBar);
