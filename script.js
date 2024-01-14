@@ -89,6 +89,61 @@ const Model = (function () {
       });
     }
   }
+  /**
+   * Insert an Activity into a ScheduleToActivitiesTree.
+   * Ensure all branches of tree exist before insertion.
+   * @param {ScheduleToActivitiesTree} tree
+   * @param {Activity} activity
+   * @returns {number} - length of array that Activity was added into
+   */
+  function insertActivityIntoScheduleTree(tree, activity) {
+    /**
+     * Ensure an array exists in obj[key].
+     * If it doesn't, create an empty one.
+     */
+    const ensureArrayExists = (obj, key) => {
+      if (!Array.isArray(obj[key]))
+        obj[key] = [];
+    }
+    /**
+     * Ensure an object exists in obj[key].
+     * If it doesn't, create it and apply
+     * default preset value.
+     */
+    const ensureObjectExists = (obj, key) => {
+      if (!helperLibrary.isObject(obj[key]))
+        obj[key] = { loose: [] };
+    }
+
+    // if activity.schedule.year is undefined (or activity.schedule),
+    // then insert in top-level "loose" array; no further traversal to be done
+    if (typeof activity.schedule === 'undefined' ||
+        !helperLibrary.isObject(activity.schedule) ||
+        typeof activity.schedule.year === 'undefined') {
+          ensureArrayExists(tree, "loose");
+          return tree.loose.push(activity);
+        }
+
+    // Traversing tree[schedule.year]
+    const schedule = activity.schedule;
+    ensureObjectExists(tree, schedule.year)
+    // check if year is last valid schedule property
+    if (typeof schedule.month === 'undefined') {
+      ensureArrayExists(tree[schedule.year], "loose");
+      return tree[schedule.year].loose.push(activity);
+    }
+    // Traversing tree[schedule.year][schedule.month]
+    ensureObjectExists(tree[schedule.year], schedule.month);
+    // check if month is last valid schedule property
+    if (typeof schedule.day === 'undefined') {
+      ensureArrayExists(tree[schedule.year][schedule.month], "loose");
+      return tree[schedule.year][schedule.month].loose.push(activity);
+    }
+    // Traversing tree[schedule.year][schedule.month][schedule.day]
+    ensureArrayExists(tree[schedule.year][schedule.month], schedule.day)
+    // assume day is last valid schedule property
+    return tree[schedule.year][schedule.month][schedule.day].push(activity);
+  }
   // Manage UUIDs
   /**
    * Return a string id that is unique among all those currently in localStorage. Uses private "uniqueIds" Set object to track used ids.
