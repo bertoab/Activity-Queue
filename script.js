@@ -161,7 +161,11 @@ const Model = (function () {
   let schedulePropertiesMappedToActivityObjects, groupIdsMappedToGroupObjects,
     groupIdsMappedToActivityIds;
 
+  // load Activity data, then iterate and record each id
+  // this helps ensure uniqueness in runtime-generated UUIDs
   schedulePropertiesMappedToActivityObjects = getActivitiesStore();
+  flattenScheduleTreeToActivitiesArray(schedulePropertiesMappedToActivityObjects).map( Activity => uniqueIds.add(Activity.id) );
+
   //...groupIdsMappedToGroupObjects = Object.fromEntries(...));
   //...groupIdsMappedToActivityIds = ...
 
