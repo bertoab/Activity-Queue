@@ -68,14 +68,15 @@ const Model = (function () {
   }
   // Manage data structures
   /**
-   * Traverse through "scheduleTree" and collect any Activities. Traverses from earliest scheduled Activity to latest (then "loose").
+   * Traverse through "scheduleTree" and collect any Activities. Traverses from earliest scheduled Activity to latest (then "loose"). Sorted with event occurring earliest in time at the beginning of the array. If any non-undefined value is present for the "latestFirst" parameter, the sorting order is reversed.
    * @param {ScheduleToActivitiesTree} scheduleTree
+   * @param {undefined | true} latestFirst
    * @returns {Array<Activity>}
    */
-  function flattenScheduleTreeToActivitiesArray (scheduleTree) {
+  function flattenScheduleTreeToActivitiesArray (scheduleTree, latestFirst) {
     let activitiesArray = [];
     recurseAndPushActivities(scheduleTree, activitiesArray);
-    return activitiesArray;
+    return typeof latestFirst === 'undefined' ? activitiesArray : activitiesArray.reverse();
 
     /** Iterate over values of "obj", recursing if another object is found or pushing values to "arr" if an array is found. */
     function recurseAndPushActivities(obj, arr) {
