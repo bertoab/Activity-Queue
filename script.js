@@ -171,7 +171,19 @@ const Model = (function () {
   //...groupIdsMappedToActivityIds = ...
 
   return {
-    // newActivity(activity) {},
+    /**
+     * Add a new Activity to local storage as well as the "schedulePropertiesMappedToActivityObjects" runtime parameter
+     * @param {Activity} activity 
+     */
+    newActivity(activity) {
+      if (uniqueIds.has(activity.id))
+        throw new Error("ID (" + activity.id + ") for Activity is already in use");
+      uniqueIds.add(activity.id);
+      // update runtime parameter
+      insertActivityIntoScheduleTree(schedulePropertiesMappedToActivityObjects, activity);
+      // save local storage
+      setActivitiesStore(schedulePropertiesMappedToActivityObjects);
+    },
     // updateActivity(activity, priorSchedule) {},
     // deleteActivity(id) {},
     // fetchActivitiesBySchedule(schedule) {}
