@@ -178,7 +178,22 @@ const Model = (function () {
       setActivitiesStore(schedulePropertiesMappedToActivityObjects);
     },
     // updateActivity(activity, priorSchedule) {},
-    // deleteActivity(id) {},
+    /**
+     * Delete an Activity object from local storage as well as the "schedulePropertiesMappedToActivityObjects" runtime parameter
+     * @param {string} id - "id" property of Activity to be deleted
+     */
+    deleteActivity(id) {
+      // find Activity object in ScheduleToActivitiesTree
+      let allActivitiesArray = flattenScheduleTreeToActivitiesArray(schedulePropertiesMappedToActivityObjects);
+      let activity = allActivitiesArray.find( searchActivity => searchActivity.id === id ); // worst case time complexity: O(n), where n is the total number of Activities in "schedulePropertiesMappedToActivityObjects"
+      // find Activity's array index
+      let activityArrayInScheduleTree = traverseScheduleTree(schedulePropertiesMappedToActivityObjects, activity.schedule);
+      let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id ); // worst case time complexity: O(m), where m is the total number of Activities in the corresponding Activity array within "schedulePropertiesMappedToActivityObjects"
+      // delete Activity
+      activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
+       // save local storage
+      setActivitiesStore(schedulePropertiesMappedToActivityObjects);
+    },
     // fetchActivitiesBySchedule(schedule) {}
     debug: {
       setActivitiesStore: setActivitiesStore,
