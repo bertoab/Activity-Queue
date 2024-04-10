@@ -91,6 +91,44 @@ const Model = (function () {
     }
   }
   /**
+   * Traverse the "scheduleTree" parameter using fields found in the "schedule" parameter to return an Activity array.
+   * @param {ScheduleToActivitiesTree} scheduleTree
+   * @param {Schedule | undefined} schedule
+   * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty arrays/objects where they are missing in "scheduleTree" (otherwise, an error is thrown)
+   * @returns {Array<Activity>} a reference encapsulated within "scheduleTree"
+   */
+  function traverseScheduleTree(scheduleTree, schedule, fillGaps) {
+    /**
+     * Assess whether or not "object[key]"" is undefined,
+     * and then take action according to value of outer scope's "fillGaps"
+     * @param {*} objectFillType - If a non-undefined value, will cause undefined value of "object[key]" to be populated with an Object instead of an Array
+     */
+    const validate = (object, key, objectFillType) => {
+      if (typeof object[key] !== 'undefined')
+        return object[key];
+      if (typeof fillGaps === 'undefined') {
+        throw new TypeError("unexpected value found while traversing tree");
+      } else {
+        object[key] = typeof objectFillType === 'undefined' ? new Array() : new Object();
+      }
+      return object[key];
+    }
+    if (typeof schedule === 'undefined' ||
+        !helperLibrary.isObject(schedule) ||
+        typeof schedule.year === 'undefined') {
+      return validate(scheduleTree, "loose");
+    }
+    validate(scheduleTree, schedule.year, true);
+    if (typeof schedule.month === 'undefined') {
+      return validate(scheduleTree[schedule.year], "loose");
+    }
+    validate(scheduleTree[schedule.year], schedule.month, true);
+    if (typeof schedule.day === 'undefined') {
+      return validate(scheduleTree[schedule.year][schedule.month], "loose");
+    }
+    return validate(scheduleTree[schedule.year][schedule.month], schedule.day);
+  }
+  /**
    * Insert an Activity into a ScheduleToActivitiesTree.
    * Ensure all branches of tree exist before insertion.
    * @param {ScheduleToActivitiesTree} tree
@@ -98,52 +136,7 @@ const Model = (function () {
    * @returns {number} - length of array that Activity was added into
    */
   function insertActivityIntoScheduleTree(tree, activity) {
-    /**
-     * Ensure an array exists in obj[key].
-     * If it doesn't, create an empty one.
-     */
-    const ensureArrayExists = (obj, key) => {
-      if (!Array.isArray(obj[key]))
-        obj[key] = [];
-    }
-    /**
-     * Ensure an object exists in obj[key].
-     * If it doesn't, create it and apply
-     * default preset value.
-     */
-    const ensureObjectExists = (obj, key) => {
-      if (!helperLibrary.isObject(obj[key]))
-        obj[key] = { loose: [] };
-    }
-
-    // if activity.schedule.year is undefined (or activity.schedule),
-    // then insert in top-level "loose" array; no further traversal to be done
-    if (typeof activity.schedule === 'undefined' ||
-        !helperLibrary.isObject(activity.schedule) ||
-        typeof activity.schedule.year === 'undefined') {
-          ensureArrayExists(tree, "loose");
-          return tree.loose.push(activity);
-        }
-
-    // Traversing tree[schedule.year]
-    const schedule = activity.schedule;
-    ensureObjectExists(tree, schedule.year)
-    // check if year is last valid schedule property
-    if (typeof schedule.month === 'undefined') {
-      ensureArrayExists(tree[schedule.year], "loose");
-      return tree[schedule.year].loose.push(activity);
-    }
-    // Traversing tree[schedule.year][schedule.month]
-    ensureObjectExists(tree[schedule.year], schedule.month);
-    // check if month is last valid schedule property
-    if (typeof schedule.day === 'undefined') {
-      ensureArrayExists(tree[schedule.year][schedule.month], "loose");
-      return tree[schedule.year][schedule.month].loose.push(activity);
-    }
-    // Traversing tree[schedule.year][schedule.month][schedule.day]
-    ensureArrayExists(tree[schedule.year][schedule.month], schedule.day)
-    // assume day is last valid schedule property
-    return tree[schedule.year][schedule.month][schedule.day].push(activity);
+    return traverseScheduleTree(tree, activity.schedule, true).push(activity);
   }
   // Manage UUIDs
   /**
