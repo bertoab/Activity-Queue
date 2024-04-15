@@ -169,9 +169,7 @@ const Model = (function () {
      * @param {Activity} activity 
      */
     newActivity(activity) {
-      if (uniqueIds.has(activity.id))
-        throw new Error("ID (" + activity.id + ") for Activity is already in use");
-      uniqueIds.add(activity.id);
+      activity.id = getUniqueId();
       // update runtime parameter
       insertActivityIntoScheduleTree(schedulePropertiesMappedToActivityObjects, activity);
       // save local storage
