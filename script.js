@@ -205,61 +205,61 @@ const Model = (function () {
 
 const ViewModel  = (argumentModel) => (function (m) {
   const model = m;
-  const state = {};
-  const context = {};
+  const State = {};
+  const DOMContext = {};
   let updateView;
-  // Change application state/context
+  // Change application State/DOMContext
   /**
-   * Overwrite the application state based on properties of "stateChangeObject"; allowed to overwrite some or all state properties. If "stateChangeObject.contentContainers" exists, DOM will be re-rendered.
-   * @param {{functionMapping?: Object, itemMapping?: Object, contentContainers?: Array<Object>}} stateChangeObject - An object containing string keys that are application state properties and appropriate values
+   * Overwrite the application State based on properties of "StateChangeObject"; allowed to overwrite some or all State properties. If "StateChangeObject.contentContainers" exists, DOM will be re-rendered.
+   * @param {{functionMapping?: Object, itemMapping?: Object, contentContainers?: Array<Object>}} StateChangeObject - An object containing string keys that are application State properties and appropriate values
    */
-  function updateState(stateChangeObject) {
-    const properties = Object.keys(stateChangeObject);
+  function updateState(StateChangeObject) {
+    const properties = Object.keys(StateChangeObject);
     if (properties.includes("functionMapping")) {
-      if (!helperLibrary.isObject(stateChangeObject.functionMapping))
-        throw new TypeError("unexpected state property type");
-      state.functionMapping = stateChangeObject.functionMapping;
+      if (!helperLibrary.isObject(StateChangeObject.functionMapping))
+        throw new TypeError("unexpected State property type");
+      State.functionMapping = StateChangeObject.functionMapping;
     }
     if (properties.includes("itemMapping")) {
-      if (!helperLibrary.isObject(stateChangeObject.itemMapping))
-        throw new TypeError("unexpected state property type");
-      state.itemMapping = stateChangeObject.itemMapping;
+      if (!helperLibrary.isObject(StateChangeObject.itemMapping))
+        throw new TypeError("unexpected State property type");
+      State.itemMapping = StateChangeObject.itemMapping;
     }
     if (properties.includes("contentContainers")) {
-      state.contentContainers = stateChangeObject.contentContainers;
+      State.contentContainers = StateChangeObject.contentContainers;
     }
   }
   /**
-   * Overwrite the application context based on properties of "contextChangeObject"; allowed to overwrite some or all context properties.
-   * @param {{type?: "main" | "modal", title?: string, content?: Array<Object>}} contextChangeObject - An object containing string keys that are application context properties and appropriate values
+   * Overwrite the application DOMContext based on properties of "DOMContextChangeObject"; allowed to overwrite some or all DOMContext properties.
+   * @param {{type?: "main" | "modal", title?: string, content?: Array<Object>}} DOMContextChangeObject - An object containing string keys that are application DOMContext properties and appropriate values
    */
-  function updateContext(contextChangeObject) {
-    const properties = Object.keys(contextChangeObject);
+  function updateDOMContext(DOMContextChangeObject) {
+    const properties = Object.keys(DOMContextChangeObject);
     if (properties.indexOf("type") !== -1) {
-      if (typeof contextChangeObject.type !== 'string')
-        throw new TypeError("unexpected context property type");
-      context.type = contextChangeObject.type;
+      if (typeof DOMContextChangeObject.type !== 'string')
+        throw new TypeError("unexpected DOMContext property type");
+      DOMContext.type = DOMContextChangeObject.type;
     }
     if (properties.indexOf("title") !== -1) {
-      if (typeof contextChangeObject.title !== 'string')
-        throw new TypeError("unexpected context property type");
-      context.title = contextChangeObject.title;
+      if (typeof DOMContextChangeObject.title !== 'string')
+        throw new TypeError("unexpected DOMContext property type");
+      DOMContext.title = DOMContextChangeObject.title;
     }
     if (properties.indexOf("content") !== -1) {
       //TODO: "content" validation
-      context.content = contextChangeObject.content;
+      DOMContext.content = DOMContextChangeObject.content;
     }
 
     if (typeof updateView === 'function')
       updateView();
   }
-  // Generate contexts
+  // Generate DOMContexts
   /**
-   * Return a context object for an error. The context is a modal type with the title "Error" and the passed message as the content.
+   * Return a DOMContext object for an error. The DOMContext is a modal type with the title "Error" and the passed message as the content.
    * @param {string} message - The error message to be displayed
    * @returns {{type: "modal", title: "Error", content: message}}
    */
-  function errorContext(message) {
+  function errorDOMContext(message) {
     if (typeof message !== 'string')
       throw new TypeError("unexpected parameter type");
     return {
@@ -291,9 +291,9 @@ const ViewModel  = (argumentModel) => (function (m) {
 
     return [str, strsToMatch];
   }
-  // Hard-coded state/context objects
+  // Hard-coded State/DOMContext objects
   const mainMenu = {
-    state: {
+    State: {
       contentContainers: [{
         type: "table",
         title: undefined,
@@ -311,7 +311,7 @@ const ViewModel  = (argumentModel) => (function (m) {
         "3": () => alert("You selected: View archived"),
       }
     },
-    context: {
+    DOMContext: {
       type: "main",
       title: "Main Menu",
       content: [
@@ -326,35 +326,35 @@ const ViewModel  = (argumentModel) => (function (m) {
       ]
     }
   };
-  // initialize state to main menu context
-  updateContext(mainMenu.context);
-  updateState(mainMenu.state);
+  // initialize State to main menu DOMContext
+  updateDOMContext(mainMenu.DOMContext);
+  updateState(mainMenu.State);
 
   // Public definitions
   return {
-    context: context,
+    DOMContext: DOMContext,
     debug: {
-      state: state,
+      State: State,
       mainMenu: mainMenu
     },
     /**
-     * Check for "Enter" keypress, then trim and split input string by comma (",") delimiter, then remove first matched acronym string (from state.functionMapping) in the input, then ensure remaining characters in first delimited string are digits, then execute matched user function with split input string array as arguments
+     * Check for "Enter" keypress, then trim and split input string by comma (",") delimiter, then remove first matched acronym string (from State.functionMapping) in the input, then ensure remaining characters in first delimited string are digits, then execute matched user function with split input string array as arguments
      * @param {Event} event - The Event object passed from the fired event listener
      */
     handleFunctionBarKeypressEventAndExecuteUserFunction(event) {
       let inputArray = event.target.value.split(",").map(str => str.trim()); // split raw input by "," delimiter and trim trailing whitespace
       if (event.key === 'Enter') { // validate for a user function
         let matchedFunctions;
-        [inputArray[0], matchedFunctions] = removeFirstMatchAndReturnOrderedMatches(inputArray[0], Object.keys(state.functionMapping));
+        [inputArray[0], matchedFunctions] = removeFirstMatchAndReturnOrderedMatches(inputArray[0], Object.keys(State.functionMapping));
         if (matchedFunctions.length !== 0) {
           if (inputArray[0] === "")
             inputArray.shift();
           else { // ensure remaining string of inputArray[0] contains digits (0-9)
             for (let i = 0; i < inputArray[0].length; i++)
               if (inputArray[0].charCodeAt(i) < 48 || inputArray[0].charCodeAt(i) > 57)
-                return updateContext(errorContext("Invalid Input"));
+                return updateDOMContext(errorDOMContext("Invalid Input"));
           }
-          state.functionMapping[matchedFunctions[0]](...inputArray);
+          State.functionMapping[matchedFunctions[0]](...inputArray);
         } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
       }
     },
@@ -451,12 +451,12 @@ const View = (argumentViewModel) => (function (vm) {
     return container;
   }
   /**
-   * Accept "content" property of application context and return the appropriately formatted HTMLElement to display as the main content
+   * Accept "content" property of application DOMContext and return the appropriately formatted HTMLElement to display as the main content
    * @param {Array} content
    * @returns {HTMLElement}
    */
   function createContentDiv(content) {
-    //TODO: iterate "content" to support multiple containers in one context
+    //TODO: iterate "content" to support multiple containers in one DOMContext
     const container = content[0];
     if (container.type === "table")
       return tableContainer(container.columnNames, container.data, container.title);
@@ -482,28 +482,28 @@ const View = (argumentViewModel) => (function (vm) {
   }
 
   /**
-   * Draw the current application context to the screen. Remove all elements from the current context div (determined by "type" context property) before drawing
+   * Draw the current application DOMContext to the screen. Remove all elements from the current DOMContext div (determined by "type" DOMContext property) before drawing
    */
   function render() {
-    // select context div
-    let contextDiv;
-    if (viewModel.context.type === "main") {
-      contextDiv = document.getElementById("main");
+    // select DOMContext div
+    let DOMContextDiv;
+    if (viewModel.DOMContext.type === "main") {
+      DOMContextDiv = document.getElementById("main");
       document.getElementById("modal-container").style.display = "none";
-    } else if (viewModel.context.type === "modal") {
-      contextDiv = document.getElementById("modal");
+    } else if (viewModel.DOMContext.type === "modal") {
+      DOMContextDiv = document.getElementById("modal");
       document.getElementById("modal-container").style.display = "flex";
     }
-    if (contextDiv === undefined)
-      throw new Error("context div not selectable");
+    if (DOMContextDiv === undefined)
+      throw new Error("DOMContext div not selectable");
     // remove existing components
-    while (contextDiv.firstChild)
-      contextDiv.removeChild(contextDiv.firstChild);
+    while (DOMContextDiv.firstChild)
+      DOMContextDiv.removeChild(DOMContextDiv.firstChild);
     // draw
-    contextDiv.appendChild(createHeading(viewModel.context.title));
-    contextDiv.appendChild(createContentDiv(viewModel.context.content));
+    DOMContextDiv.appendChild(createHeading(viewModel.DOMContext.title));
+    DOMContextDiv.appendChild(createContentDiv(viewModel.DOMContext.content));
     const funcBar = createFunctionBarAndAttachKeyPressHandler(); // define as variable to set cursor focus
-    contextDiv.appendChild(funcBar);
+    DOMContextDiv.appendChild(funcBar);
     funcBar.firstChild.focus();
   }
 

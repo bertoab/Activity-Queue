@@ -179,12 +179,12 @@ describe('ViewModel', () => {
       }
     };
     /**
-     * Assert that an errorContext is set in application state. Then, reset state to mainMenuContext with testMapping as context's functionMapping.
+     * Assert that an errorDOMContext is set in application State. Then, reset State to mainMenuDOMContext with testMapping as DOMContext's functionMapping.
      * @param {string} expectedErrorMessage
-     * @param {object} testMapping The functionMapping object to be applied after resetting context
+     * @param {object} testMapping The functionMapping object to be applied after resetting DOMContext
      */
-    const assertErrorContextAndReset = function(expectedErrorMessage, testMapping) {
-      expect(viewModel.context).toEqual(expect.objectContaining({
+    const assertErrorDOMContextAndReset = function(expectedErrorMessage, testMapping) {
+      expect(viewModel.DOMContext).toEqual(expect.objectContaining({
         type: "modal",
         title: "Error",
         content: [{
@@ -193,12 +193,12 @@ describe('ViewModel', () => {
             data: [[expectedErrorMessage]]
           }]
       }));
-      Object.assign(viewModel.debug.state, viewModel.debug.mainMenu.state);
-      Object.assign(viewModel.context, viewModel.debug.mainMenu.context);
-      viewModel.debug.state.functionMapping = testMapping;
+      Object.assign(viewModel.debug.State, viewModel.debug.mainMenu.State);
+      Object.assign(viewModel.DOMContext, viewModel.debug.mainMenu.DOMContext);
+      viewModel.debug.State.functionMapping = testMapping;
     };
 
-    test("when multiple user function acronym strings and/or extra alphabetical characters are present, execute none and change context to errorModal", () => {
+    test("when multiple user function acronym strings and/or extra alphabetical characters are present, execute none and change DOMContext to errorModal", () => {
       // setup
       const fail = jest.fn();
       const errorMessage = "Invalid Input";
@@ -207,19 +207,19 @@ describe('ViewModel', () => {
         "B": fail,
         "C": fail
       };
-      viewModel.debug.state.functionMapping = testFunctionMapping;
+      viewModel.debug.State.functionMapping = testFunctionMapping;
       // run 1
       const event = createSyntheticKeyboardEvent("AB");
       viewModel.handleFunctionBarKeypressEventAndExecuteUserFunction(event);
-      assertErrorContextAndReset(errorMessage, testFunctionMapping);
+      assertErrorDOMContextAndReset(errorMessage, testFunctionMapping);
       // run 2
       event.target.value = "ABC";
       viewModel.handleFunctionBarKeypressEventAndExecuteUserFunction(event);
-      assertErrorContextAndReset(errorMessage, testFunctionMapping);
+      assertErrorDOMContextAndReset(errorMessage, testFunctionMapping);
       // run 3
       event.target.value = "C A";
       viewModel.handleFunctionBarKeypressEventAndExecuteUserFunction(event);
-      assertErrorContextAndReset(errorMessage, testFunctionMapping);
+      assertErrorDOMContextAndReset(errorMessage, testFunctionMapping);
 
       // assertions
       expect(fail.mock.calls).toHaveLength(0);
@@ -227,7 +227,7 @@ describe('ViewModel', () => {
     test("match user function acronym strings in a case-insensitive manner", () => {
       // setup
       const pass = jest.fn();
-      viewModel.debug.state.functionMapping = {
+      viewModel.debug.State.functionMapping = {
         "A": pass,
         "B": pass,
         "C": pass,
@@ -259,7 +259,7 @@ describe('ViewModel', () => {
     test("when user function acronym strings are 2+ letters in length, match them before those of lesser length", () => {
       // setup
       const pass = jest.fn(), fail = jest.fn();
-      viewModel.debug.state.functionMapping = {
+      viewModel.debug.State.functionMapping = {
         "A": fail,
         "ABC": pass,
         "GH": fail,
@@ -284,7 +284,7 @@ describe('ViewModel', () => {
     test("when a user function acronym string is matched and a single integer index is present, user function is called with integer index as sole parameter", () => {
       // setup
       const pass = jest.fn();
-      viewModel.debug.state.functionMapping = {
+      viewModel.debug.State.functionMapping = {
         "A": pass
       };
       // run 1
@@ -306,7 +306,7 @@ describe('ViewModel', () => {
     test("when a user function acronym string is matched and two integer indexes (separated by a comma) are present, user function is called with first integer index as first argument, and second integer index as second argument", () => {
       // setup
       const pass = jest.fn();
-      viewModel.debug.state.functionMapping = {
+      viewModel.debug.State.functionMapping = {
         "A": pass
       };
       // run 1
@@ -325,8 +325,8 @@ describe('ViewModel', () => {
       // assertions
       expect(pass.mock.calls).toEqual([["1", "1"], ["1", "9"], ["31", "29"], ["0", "12"]]);
     });
-    test.todo("when a user function acronym string is matched and a single integer index is present but there are extra alphabetical characters in the string, the function is not executed and an 'Invalid Input' alert is shown via context update");
-    test.todo("when a user function acronym string is matched and a single integer index is present with a non-conventional format (hexadecimal, binary, or decimal exponentation notation), an alert 'Invalid Input' is shown via context update");
+    test.todo("when a user function acronym string is matched and a single integer index is present but there are extra alphabetical characters in the string, the function is not executed and an 'Invalid Input' alert is shown via DOMContext update");
+    test.todo("when a user function acronym string is matched and a single integer index is present with a non-conventional format (hexadecimal, binary, or decimal exponentation notation), an alert 'Invalid Input' is shown via DOMContext update");
   });
 });
 describe('View', () => {});
