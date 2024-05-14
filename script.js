@@ -91,42 +91,59 @@ const Model = (function () {
     }
   }
   /**
-   * Traverse the "scheduleTree" parameter using fields found in the "schedule" parameter to return an Activity array.
+   * Find and return a reference to a position within "scheduleTree" as described in "schedule". If a reference leading up to and including the final position as described in "schedule" is not defined within "scheduleTree", behavior depends on value of "fillGaps".
    * @param {ScheduleToActivitiesTree} scheduleTree
    * @param {Schedule | undefined} schedule
-   * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty arrays/objects where they are missing in "scheduleTree" (otherwise, an error is thrown)
-   * @returns {Array<Activity>} a reference encapsulated within "scheduleTree"
+   * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty objects/arrays where they are missing in "scheduleTree" (otherwise, a TypeError is thrown for property access on undefined)
+   * @returns {Array<Activity> | DaysToActivitiesMap | MonthsAndDaysToActivitiesTree | ScheduleToActivitiesTree | undefined}
    */
-  function traverseScheduleTree(scheduleTree, schedule, fillGaps) {
-    /**
-     * Assess whether or not "object[key]"" is undefined,
-     * and then take action according to value of outer scope's "fillGaps"
-     * @param {*} objectFillType - If a non-undefined value, will cause undefined value of "object[key]" to be populated with an Object instead of an Array
-     */
-    const validate = (object, key, objectFillType) => {
-      if (typeof object[key] !== 'undefined')
-        return object[key];
-      if (typeof fillGaps === 'undefined') {
-        throw new TypeError("unexpected value found while traversing tree");
-      } else {
-        object[key] = typeof objectFillType === 'undefined' ? new Array() : new Object();
-      }
-      return object[key];
-    }
+  function findPositionInScheduleTree(scheduleTree, schedule, fillGaps) {
+    // validate schedule, schedule["year"], and scheduleTree[schedule.year]
     if (typeof schedule === 'undefined' ||
         !helperLibrary.isObject(schedule) ||
         typeof schedule.year === 'undefined') {
-      return validate(scheduleTree, "loose");
+      return scheduleTree;
     }
-    validate(scheduleTree, schedule.year, true);
+    if (typeof scheduleTree[schedule.year] === 'undefined'
+        && typeof fillGaps !== 'undefined') {
+      scheduleTree[schedule.year] = {};
+    }
+    // validate schedule["month"] and scheduleTree[schedule.year][schedule.month]
     if (typeof schedule.month === 'undefined') {
-      return validate(scheduleTree[schedule.year], "loose");
+      return scheduleTree[schedule.year];
     }
-    validate(scheduleTree[schedule.year], schedule.month, true);
+    if (typeof scheduleTree[schedule.year][schedule.month] === 'undefined'
+        && typeof fillGaps !== 'undefined') {
+      scheduleTree[schedule.year][schedule.month] = {};
+    }
+    // validate schedule["day"] and scheduleTree[schedule.year][schedule.month][schedule.day]
     if (typeof schedule.day === 'undefined') {
-      return validate(scheduleTree[schedule.year][schedule.month], "loose");
+      return scheduleTree[schedule.year][schedule.month];
     }
-    return validate(scheduleTree[schedule.year][schedule.month], schedule.day);
+    if (typeof scheduleTree[schedule.year][schedule.month][schedule.day] === 'undefined'
+        && typeof fillGaps !== 'undefined') {
+      scheduleTree[schedule.year][schedule.month][schedule.day] = []; // array is expected here, rather than tree
+    }
+    return scheduleTree[schedule.year][schedule.month][schedule.day];
+  }
+  /**
+   * Traverse the "scheduleTree" parameter using fields found in the "schedule" parameter to return a corresponding Activity array. If a branch of "scheduleTree" is missing along the way, behavior depends on value of "fillGaps".
+   * @param {ScheduleToActivitiesTree} scheduleTree
+   * @param {Schedule | undefined} schedule
+   * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty arrays/objects where they are missing in "scheduleTree" (otherwise, a TypeError is thrown for property retrieval on undefined)
+   * @returns {Array<Activity>} a reference encapsulated within "scheduleTree"
+   */
+  function findActivityArray(scheduleTree, schedule, fillGaps) {
+    const treePosition = findPositionInScheduleTree(scheduleTree, schedule, fillGaps);
+    if (Array.isArray(treePosition)) {
+      return treePosition;
+    }
+    if (helperLibrary.isObject(treePosition)) {
+      if (typeof treePosition["loose"] === 'undefined' && typeof fillGaps !== 'undefined')
+        treePosition["loose"] = [];
+      return treePosition["loose"];
+    }
+    throw new TypeError("Position in scheduleTree is invalid type");
   }
   /**
    * Insert an Activity into a ScheduleToActivitiesTree.
@@ -136,7 +153,7 @@ const Model = (function () {
    * @returns {number} - length of array that Activity was added into
    */
   function insertActivityIntoScheduleTree(tree, activity) {
-    return traverseScheduleTree(tree, activity.schedule, true).push(activity);
+    return findActivityArray(tree, activity.schedule, true).push(activity);
   }
   // Manage UUIDs
   /**
@@ -185,7 +202,7 @@ const Model = (function () {
       let allActivitiesArray = flattenScheduleTreeToActivitiesArray(schedulePropertiesMappedToActivityObjects);
       let activity = allActivitiesArray.find( searchActivity => searchActivity.id === id ); // worst case time complexity: O(n), where n is the total number of Activities in "schedulePropertiesMappedToActivityObjects"
       // find Activity's array index
-      let activityArrayInScheduleTree = traverseScheduleTree(schedulePropertiesMappedToActivityObjects, activity.schedule);
+      let activityArrayInScheduleTree = findActivityArray(schedulePropertiesMappedToActivityObjects, activity.schedule);
       let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id ); // worst case time complexity: O(m), where m is the total number of Activities in the corresponding Activity array within "schedulePropertiesMappedToActivityObjects"
       // delete Activity
       activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
