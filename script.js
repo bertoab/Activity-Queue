@@ -38,6 +38,9 @@ const Model = (function () {
    * @typedef {Object} ScheduleToActivitiesTree Multi-level object containing arrays of Activities with year, month, and day from "schedule" property as keys (or "loose" if some or all of these properties are omitted)
    * @property {MonthsAndDaysToActivitiesTree} $year A 4 digit integer
    * @property {Array<Activity>} loose Activities without a valid schedule.year property
+   *
+   * @typedef {Object} ActivityFilter Object describing properties and values used to filter Array<Activity>
+   * @property {boolean?} checked_off
    */
 
   const ACTIVITIES_STORAGE_KEY = "activities";
@@ -154,6 +157,32 @@ const Model = (function () {
    */
   function insertActivityIntoScheduleTree(tree, activity) {
     return findActivityArray(tree, activity.schedule, true).push(activity);
+  }
+  // Manage Array<Activity> structure
+  /**
+   * Filter "activityArray" and return a new array of the Activities passing the filter criteria. Will not replace any value for a property being tested on an Activity where it is "undefined".
+   * @param {Array<Activity>} activityArray
+   * @param {ActivityFilter} filter - Object specifying properties and values to use for filtering
+   * @param {boolean?} testForInequality - If the value is "true", then causes function to exclusively include Activities containing properties that do not equal those in "filter". For all other values, the function will exclusively include Activities containing properties that equal those in "filter".
+   */
+  function filterActivityArray(activityArray, filter, testForInequality) {
+    let filterTest; // configured to return "true" if an Activity's property passes the filter
+    if (testForInequality === true) {
+      filterTest = (param1, param2) => param1 !== param2;
+    } else {
+      filterTest = (param1, param2) => param1 === param2;
+    }
+    const successfullyFiltered = [];
+    for (const activity of activityArray) {
+      validateActivity: { // define named block to break when a filter test fails
+        for (const filterProperty in filter) {
+          if (!filterTest(activity[filterProperty], filter[filterProperty]))
+            break validateActivity;
+        }
+        successfullyFiltered.push(activity);
+      }
+    }
+    return successfullyFiltered;
   }
   // Manage UUIDs
   /**
