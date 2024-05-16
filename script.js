@@ -69,7 +69,7 @@ const Model = (function () {
       throw new TypeError("Local storage data is non-object")
     return loadedData;
   }
-  // Manage data structures
+  // Manage ScheduleToActivitiesTree (and similar) structures
   /**
    * Traverse through "scheduleTree" and collect any Activities. Traverses from earliest scheduled Activity to latest (then "loose"). Sorted with event occurring earliest in time at the beginning of the array. If any non-undefined value is present for the "latestFirst" parameter, the sorting order is reversed.
    * @param {ScheduleToActivitiesTree} scheduleTree
@@ -136,7 +136,7 @@ const Model = (function () {
    * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty arrays/objects where they are missing in "scheduleTree" (otherwise, a TypeError is thrown for property retrieval on undefined)
    * @returns {Array<Activity>} a reference encapsulated within "scheduleTree"
    */
-  function findActivityArray(scheduleTree, schedule, fillGaps) {
+  function findSpecificActivityArrayInScheduleTree(scheduleTree, schedule, fillGaps) {
     const treePosition = findPositionInScheduleTree(scheduleTree, schedule, fillGaps);
     if (Array.isArray(treePosition)) {
       return treePosition;
@@ -156,7 +156,7 @@ const Model = (function () {
    * @returns {number} - length of array that Activity was added into
    */
   function insertActivityIntoScheduleTree(tree, activity) {
-    return findActivityArray(tree, activity.schedule, true).push(activity);
+    return findSpecificActivityArrayInScheduleTree(tree, activity.schedule, true).push(activity);
   }
   // Manage Array<Activity> structure
   /**
@@ -231,7 +231,7 @@ const Model = (function () {
       let allActivitiesArray = flattenScheduleTreeToActivitiesArray(schedulePropertiesMappedToActivityObjects);
       let activity = allActivitiesArray.find( searchActivity => searchActivity.id === id ); // worst case time complexity: O(n), where n is the total number of Activities in "schedulePropertiesMappedToActivityObjects"
       // find Activity's array index
-      let activityArrayInScheduleTree = findActivityArray(schedulePropertiesMappedToActivityObjects, activity.schedule);
+      let activityArrayInScheduleTree = findSpecificActivityArrayInScheduleTree(schedulePropertiesMappedToActivityObjects, activity.schedule);
       let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id ); // worst case time complexity: O(m), where m is the total number of Activities in the corresponding Activity array within "schedulePropertiesMappedToActivityObjects"
       // delete Activity
       activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
