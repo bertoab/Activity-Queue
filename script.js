@@ -190,6 +190,7 @@ const Model = (function () {
    * @param {Array<Activity>} activityArray
    * @param {ActivityFilter} filter - Object specifying properties and values to use for filtering
    * @param {boolean?} testForInequality - If the value is "true", then causes function to exclusively include Activities containing properties that do not equal those in "filter". For all other values, the function will exclusively include Activities containing properties that equal those in "filter".
+   * @returns {Array<Activity>}
    */
   function filterActivityArray(activityArray, filter, testForInequality) {
     let filterTest; // configured to return "true" if an Activity's property passes the filter
