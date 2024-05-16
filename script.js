@@ -293,7 +293,7 @@ const ViewModel  = (argumentModel) => (function (m) {
   const State = {};
   const DOMContext = {};
   let updateView;
-  // Change application State/DOMContext
+  // Manage application State/DOMContext
   /**
    * Overwrite the application State based on
    * properties of "StateChangeObject";
@@ -344,29 +344,7 @@ const ViewModel  = (argumentModel) => (function (m) {
     if (typeof updateView === 'function')
       updateView();
   }
-  // Generate DOMContexts
-  /**
-   * Return a DOMContext object for an error.
-   * The DOMContext is a modal type with
-   * the title "Error" and the passed
-   * message as the content.
-   * @param {string} message - The error message to be displayed
-   * @returns {{type: "modal", title: "Error", content: message}}
-   */
-  function errorDOMContext(message) {
-    if (typeof message !== 'string')
-      throw new TypeError("unexpected parameter type");
-    return {
-      type: "modal",
-      title: "Error",
-      content: [{
-        type: "table",
-        columnNames: ["Message(s)"],
-        data: [[message]]
-      }]
-    };
-  }
-  // FunctionBar
+  // FunctionBar Input utilities
   /**
    * Search for all members of "strsToMatch"
    * within "str". The first occurring member
@@ -387,6 +365,28 @@ const ViewModel  = (argumentModel) => (function (m) {
     str = str.replace(strsToMatch[0], ""); // remove earliest occurring string from str
 
     return [str, strsToMatch];
+  }
+  // Generate State/DOMContext objects
+  /**
+   * Return a DOMContext object for an error.
+   * The DOMContext is a modal type with
+   * the title "Error" and the passed
+   * message as the content.
+   * @param {string} message - The error message to be displayed
+   * @returns {{type: "modal", title: "Error", content: message}}
+   */
+  function errorDOMContext(message) {
+    if (typeof message !== 'string')
+      throw new TypeError("unexpected parameter type");
+    return {
+      type: "modal",
+      title: "Error",
+      content: [{
+        type: "table",
+        columnNames: ["Message(s)"],
+        data: [[message]]
+      }]
+    };
   }
   // Hard-coded State/DOMContext objects
   const mainMenu = {
@@ -423,7 +423,7 @@ const ViewModel  = (argumentModel) => (function (m) {
       ]
     }
   };
-  // initialize State to main menu DOMContext
+  // Initialize application to main menu State/DOMContext
   updateDOMContext(mainMenu.DOMContext);
   updateState(mainMenu.State);
 
