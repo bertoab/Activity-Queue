@@ -1,4 +1,7 @@
-// Independent functions that can be used across Model, ViewModel, and View.
+/**
+ * Independent functions that can be used across
+ * Model, ViewModel, and View.
+ */
 const helperLibrary = {
   isObject(arg) {
     return typeof arg === 'object' &&
@@ -35,11 +38,14 @@ const Model = (function () {
    * @property {DaysToActivitiesMap} $month $month is an integer between 1 - 12
    * @property {Array<Activity>} loose Activities without a valid schedule.month property
    *
-   * @typedef {Object} ScheduleToActivitiesTree Multi-level object containing arrays of Activities with year, month, and day from "schedule" property as keys (or "loose" if some or all of these properties are omitted)
+   * @typedef {Object} ScheduleToActivitiesTree
+   * Multi-level object containing arrays of Activities with year, month, and day
+   * from "schedule" property as keys (or "loose" if some or all of these properties are omitted)
    * @property {MonthsAndDaysToActivitiesTree} $year A 4 digit integer
    * @property {Array<Activity>} loose Activities without a valid schedule.year property
    *
-   * @typedef {Object} ActivityFilter Object describing properties and values used to filter Array<Activity>
+   * @typedef {Object} ActivityFilter
+   * Object describing properties and values used to filter Array<Activity>
    * @property {boolean?} checked_off
    */
 
@@ -48,17 +54,18 @@ const Model = (function () {
   // Manage local storage
   /**
    * Set (or clear) local storage
-   * @param {ScheduleToActivitiesTree?} schedulePropertiesMappedToActivityObjects - If non-object then an empty object is saved.
+   * @param {ScheduleToActivitiesTree?} scheduleTree - If non-object then an empty object is saved.
    */
-  const setActivitiesStore = (schedulePropertiesMappedToActivityObjects) => {
-    if (!helperLibrary.isObject(schedulePropertiesMappedToActivityObjects)) {
+  const setActivitiesStore = (scheduleTree) => {
+    if (!helperLibrary.isObject(scheduleTree)) {
       localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify({}));
       return;
     }
-    localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(schedulePropertiesMappedToActivityObjects));
+    localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(scheduleTree));
   }
   /**
-   * Read local storage and return its contents, or throw error if contents corrupted.
+   * Read local storage and return its contents,
+   * or throw error if contents corrupted.
    * @returns {ScheduleToActivitiesTree}
    */
   const getActivitiesStore = () => {
@@ -71,7 +78,11 @@ const Model = (function () {
   }
   // Manage ScheduleToActivitiesTree (and similar) structures
   /**
-   * Traverse through "scheduleTree" and collect any Activities. Traverses from earliest scheduled Activity to latest (then "loose"). Sorted with event occurring earliest in time at the beginning of the array. If any non-undefined value is present for the "latestFirst" parameter, the sorting order is reversed.
+   * Traverse through "scheduleTree" and collect any Activities.
+   * Traverses from earliest scheduled Activity to latest (then "loose").
+   * By default, sorted with event occurring earliest in time at the
+   * beginning of the array. If any non-undefined value is present
+   * for the "latestFirst" parameter, the sorting order is reversed.
    * @param {ScheduleToActivitiesTree} scheduleTree
    * @param {undefined | true} latestFirst
    * @returns {Array<Activity>}
@@ -81,7 +92,11 @@ const Model = (function () {
     recurseAndPushActivities(scheduleTree, activitiesArray);
     return typeof latestFirst === 'undefined' ? activitiesArray : activitiesArray.reverse();
 
-    /** Iterate over values of "obj", recursing if another object is found or pushing values to "arr" if an array is found. */
+    /** Iterate over values of "obj", 
+     * recursing if another object is
+     * found or pushing values to "arr"
+     * if an array is found.
+     */
     function recurseAndPushActivities(obj, arr) {
       Object.values(obj).map( (value) => {
         if (helperLibrary.isObject(value)) {
@@ -94,7 +109,12 @@ const Model = (function () {
     }
   }
   /**
-   * Find and return a reference to a position within "scheduleTree" as described in "schedule". If a reference leading up to and including the final position as described in "schedule" is not defined within "scheduleTree", behavior depends on value of "fillGaps".
+   * Find and return a reference to a position
+   * within "scheduleTree" as described in "schedule".
+   * If a reference leading up to and including
+   * the final position as described in "schedule"
+   * is not defined within "scheduleTree",
+   * behavior depends on value of "fillGaps".
    * @param {ScheduleToActivitiesTree} scheduleTree
    * @param {Schedule | undefined} schedule
    * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty objects/arrays where they are missing in "scheduleTree" (otherwise, a TypeError is thrown for property access on undefined)
@@ -130,7 +150,10 @@ const Model = (function () {
     return scheduleTree[schedule.year][schedule.month][schedule.day];
   }
   /**
-   * Traverse the "scheduleTree" parameter using fields found in the "schedule" parameter to return a corresponding Activity array. If a branch of "scheduleTree" is missing along the way, behavior depends on value of "fillGaps".
+   * Traverse the "scheduleTree" parameter using fields
+   * found in the "schedule" parameter to return a
+   * corresponding Activity array. If a branch of "scheduleTree"
+   * is missing along the way, behavior depends on value of "fillGaps".
    * @param {ScheduleToActivitiesTree} scheduleTree
    * @param {Schedule | undefined} schedule
    * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty arrays/objects where they are missing in "scheduleTree" (otherwise, a TypeError is thrown for property retrieval on undefined)
@@ -160,7 +183,10 @@ const Model = (function () {
   }
   // Manage Array<Activity> structure
   /**
-   * Filter "activityArray" and return a new array of the Activities passing the filter criteria. Will not replace any value for a property being tested on an Activity where it is "undefined".
+   * Filter "activityArray" and return a new array
+   * of the Activities passing the filter criteria.
+   * Will not replace any value for a property being
+   * tested on an Activity where it is "undefined".
    * @param {Array<Activity>} activityArray
    * @param {ActivityFilter} filter - Object specifying properties and values to use for filtering
    * @param {boolean?} testForInequality - If the value is "true", then causes function to exclusively include Activities containing properties that do not equal those in "filter". For all other values, the function will exclusively include Activities containing properties that equal those in "filter".
@@ -186,7 +212,9 @@ const Model = (function () {
   }
   // Manage UUIDs
   /**
-   * Return a string id that is unique among all those currently in localStorage. Uses private "uniqueIds" Set object to track used ids.
+   * Return a string id that is unique among
+   * all those currently in localStorage. Uses private
+   * "uniqueIds" Set object to track used ids.
    * @returns {string}
    */
   function getUniqueId() {
@@ -211,7 +239,8 @@ const Model = (function () {
 
   return {
     /**
-     * Add a new Activity to local storage as well as the "schedulePropertiesMappedToActivityObjects" runtime parameter
+     * Add a new Activity to local storage as well as the
+     * "schedulePropertiesMappedToActivityObjects" runtime parameter
      * @param {Activity} activity 
      */
     newActivity(activity) {
@@ -223,16 +252,27 @@ const Model = (function () {
     },
     // updateActivity(activity, priorSchedule) {},
     /**
-     * Delete an Activity object from local storage as well as the "schedulePropertiesMappedToActivityObjects" runtime parameter
+     * Delete an Activity object from local storage as well as the
+     * "schedulePropertiesMappedToActivityObjects" runtime parameter
      * @param {string} id - "id" property of Activity to be deleted
      */
     deleteActivity(id) {
       // find Activity object in ScheduleToActivitiesTree
       let allActivitiesArray = flattenScheduleTreeToActivitiesArray(schedulePropertiesMappedToActivityObjects);
-      let activity = allActivitiesArray.find( searchActivity => searchActivity.id === id ); // worst case time complexity: O(n), where n is the total number of Activities in "schedulePropertiesMappedToActivityObjects"
+      /**
+       * worst case time complexity of next interpreted line: O(n),
+       * where n is the total number of Activities
+       * in "schedulePropertiesMappedToActivityObjects"
+       */
+      let activity = allActivitiesArray.find( searchActivity => searchActivity.id === id );
       // find Activity's array index
       let activityArrayInScheduleTree = findSpecificActivityArrayInScheduleTree(schedulePropertiesMappedToActivityObjects, activity.schedule);
-      let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id ); // worst case time complexity: O(m), where m is the total number of Activities in the corresponding Activity array within "schedulePropertiesMappedToActivityObjects"
+      /**
+       * worst case time complexity of next interpreted line: O(m),
+       * where m is the total number of Activities in the corresponding
+       * Activity array within "schedulePropertiesMappedToActivityObjects"
+       */
+      let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id );
       // delete Activity
       activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
        // save local storage
@@ -254,7 +294,11 @@ const ViewModel  = (argumentModel) => (function (m) {
   let updateView;
   // Change application State/DOMContext
   /**
-   * Overwrite the application State based on properties of "StateChangeObject"; allowed to overwrite some or all State properties. If "StateChangeObject.contentContainers" exists, DOM will be re-rendered.
+   * Overwrite the application State based on
+   * properties of "StateChangeObject";
+   * allowed to overwrite some or all State properties.
+   * If "StateChangeObject.contentContainers" exists,
+   * DOM will be re-rendered.
    * @param {{functionMapping?: Object, itemMapping?: Object, contentContainers?: Array<Object>}} StateChangeObject - An object containing string keys that are application State properties and appropriate values
    */
   function updateState(StateChangeObject) {
@@ -274,7 +318,9 @@ const ViewModel  = (argumentModel) => (function (m) {
     }
   }
   /**
-   * Overwrite the application DOMContext based on properties of "DOMContextChangeObject"; allowed to overwrite some or all DOMContext properties.
+   * Overwrite the application DOMContext based on
+   * properties of "DOMContextChangeObject";
+   * allowed to overwrite some or all DOMContext properties.
    * @param {{type?: "main" | "modal", title?: string, content?: Array<Object>}} DOMContextChangeObject - An object containing string keys that are application DOMContext properties and appropriate values
    */
   function updateDOMContext(DOMContextChangeObject) {
@@ -299,7 +345,10 @@ const ViewModel  = (argumentModel) => (function (m) {
   }
   // Generate DOMContexts
   /**
-   * Return a DOMContext object for an error. The DOMContext is a modal type with the title "Error" and the passed message as the content.
+   * Return a DOMContext object for an error.
+   * The DOMContext is a modal type with
+   * the title "Error" and the passed
+   * message as the content.
    * @param {string} message - The error message to be displayed
    * @returns {{type: "modal", title: "Error", content: message}}
    */
@@ -318,7 +367,10 @@ const ViewModel  = (argumentModel) => (function (m) {
   }
   // FunctionBar
   /**
-   * Search for all members of "strsToMatch" within "str". The first occurring member of "strsToMatch" is removed from "str". Assumes all strings in "strsToMatch" are uppercase.
+   * Search for all members of "strsToMatch"
+   * within "str". The first occurring member
+   * of "strsToMatch" is removed from "str".
+   * Assumes all strings in "strsToMatch" are uppercase.
    * @param {string} str - The string to be searched
    * @param {Array<string>} strsToMatch - An array of strings to be searched for in "str"
    * @returns {[string, Array<string>]} - A tuple; index 0 contains "str" after the first matched string has been removed & index 1 contains an array of each matched string
@@ -382,7 +434,13 @@ const ViewModel  = (argumentModel) => (function (m) {
       mainMenu: mainMenu
     },
     /**
-     * Check for "Enter" keypress, then trim and split input string by comma (",") delimiter, then remove first matched acronym string (from State.functionMapping) in the input, then ensure remaining characters in first delimited string are digits, then execute matched user function with split input string array as arguments
+     * Check for "Enter" keypress, then trim and split
+     * input string by comma (",") delimiter, then remove
+     * first matched acronym string (from State.functionMapping)
+     * in the input, then ensure remaining characters
+     * in first delimited string are digits,
+     * then execute matched user function with
+     * split input string array as arguments
      * @param {Event} event - The Event object passed from the fired event listener
      */
     handleFunctionBarKeypressEventAndExecuteUserFunction(event) {
@@ -431,7 +489,9 @@ const View = (argumentViewModel) => (function (vm) {
     return headerDiv;
   }
   /**
-   * Return a div containing an HTML table element based on an array of arrays, accepting a single-layer array for the columns and a two-layer array for the data 
+   * Return a div containing an HTML table element based on
+   * an array of arrays, accepting a single-layer array for
+   * the columns and a two-layer array for the data 
    * @param {Array<string>} cols - An array of strings to name the table columns
    * @param {Array<Array<string>>} data - A two-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
    * @returns {HTMLElement}
@@ -463,7 +523,9 @@ const View = (argumentViewModel) => (function (vm) {
     return container;
   }
   /**
-   * Return an HTML div element containing parameter information, based on an array of arrays detailing their names, visual string indexes, and CSS id attributes
+   * Return an HTML div element containing parameter information,
+   * based on an array of arrays detailing their names,
+   * visual string indexes, and CSS id attributes
    * @param {Array<Array<string>} parameterData - Two-layer array; the inner arrays must contain either a single string value or 3 values, where the first index is a string corresponding to the name of the parameter, the second index is a string that is the visual index value of the parameter, and the third index is a string that is the id CSS attribute of the input element for the parameter
    * @returns {HTMLElement}
    */
@@ -495,7 +557,9 @@ const View = (argumentViewModel) => (function (vm) {
     return container;
   }
   /**
-   * Accept "content" property of application DOMContext and return the appropriately formatted HTMLElement to display as the main content
+   * Accept "content" property of application DOMContext
+   * and return the appropriately formatted HTMLElement
+   * to display as the main content
    * @param {Array} content
    * @returns {HTMLElement}
    */
@@ -509,7 +573,9 @@ const View = (argumentViewModel) => (function (vm) {
     throw new TypeError("unexpected parameter type");
   }
   /**
-   * Create HTML elements for the FunctionBar component and attach a "keypress" listener to validate and execute on input (via a ViewModel callback function)
+   * Create HTML elements for the FunctionBar component
+   * and attach a "keypress" listener to validate and
+   * execute on input (via a ViewModel callback function)
    * @returns {HTMLElement} - The "div" element, containing the "input" element
    */
   function createFunctionBarAndAttachKeyPressHandler() {
@@ -526,7 +592,10 @@ const View = (argumentViewModel) => (function (vm) {
   }
 
   /**
-   * Draw the current application DOMContext to the screen. Remove all elements from the current DOMContext div (determined by "type" DOMContext property) before drawing
+   * Draw the current application DOMContext
+   * to the screen. Remove all elements from
+   * the current DOMContext div (determined by
+   * "type" DOMContext property) before drawing
    */
   function render() {
     // select DOMContext div
@@ -636,7 +705,10 @@ class LinkedList {
   }
 }
 
-// Define module exports else initialize application when run as main script
+/**
+ * Define module exports else initialize
+ * application when run as main script
+ */
 if (typeof exports === 'object') {
   exports.Model = Model;
   exports.ViewModel = ViewModel;
