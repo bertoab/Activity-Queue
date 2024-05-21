@@ -565,7 +565,6 @@ const ViewModel  = (argumentModel) => (function (m) {
 
 const View = (argumentViewModel) => (function (vm) {
   const viewModel = vm;
-  viewModel.setUpdateView(render);
   
   /**
    * Create a styled "h2"
@@ -711,6 +710,7 @@ const View = (argumentViewModel) => (function (vm) {
     funcBar.firstChild.focus();
   }
 
+  viewModel.setUpdateView(render); // also triggers initial render
 })(argumentViewModel);
 
 
