@@ -181,6 +181,65 @@ const Model = (function () {
   function insertActivityIntoScheduleTree(tree, activity) {
     return findSpecificActivityArrayInScheduleTree(tree, activity.schedule, true).push(activity);
   }
+  // Manage Activity properties
+  /**
+   * Return an integer representing the number of
+   * valid subsequential levels found within "schedule".
+   * Validates that type of each property is "number".
+   * @param {Schedule} schedule
+   * @returns {number}
+   * - 0 = none
+   * - 1 = year
+   * - 2 = month
+   * - 3 = day
+   * - 4 = hour
+   * - 5 = minute
+   */
+  function findScheduleDepth(schedule) {
+    if (typeof schedule === 'undefined' ||
+        !helperLibrary.isObject(schedule) ||
+        typeof schedule.year !== 'number') {
+      return 0;
+    }
+    if (typeof schedule.month !== 'number')
+      return 1;
+    if (typeof schedule.day !== 'number')
+      return 2;
+    if (typeof schedule.hour !== 'number')
+      return 3;
+    if (typeof schedule.minute !== 'number')
+      return 4;
+    // all "schedule" properties present
+    return 5;
+  }
+  /**
+   * Return a Date object representing closest chronological
+   * approximation to properties of "schedule". Assumes
+   * invalid "schedule" object to evaluate to Unix epoch.
+   * @param {Schedule} schedule
+   * @returns {Date}
+   */
+  function dateFromSchedule(schedule) {
+    let depth = findScheduleDepth(schedule);
+    if (depth === 0) {
+      return new Date(0); // Unix epoch
+    }
+    let params = new Array(depth);
+    depth--; // offset to properly align with "FIELDS"
+    const FIELDS = ["year", "month", "day", "hour", "minute"];
+    while (depth >= 0) {
+      let scheduleValue = schedule[FIELDS[depth]];
+      if (depth === 1) {
+        scheduleValue--; // offset for difference in month-integer mapping
+      }
+      params[depth] = scheduleValue;
+      depth--;
+    }
+    // "January" placeholder value to prevent unexpected Unix epoch timestamp
+    if (params.length === 1)
+      params.push(0);
+    return new Date(...params);
+  }
   // Manage Array<Activity> structure
   /**
    * Filter "activityArray" and return a new array
@@ -210,6 +269,36 @@ const Model = (function () {
       }
     }
     return successfullyFiltered;
+  }
+  /**
+   * Compare the "schedule" property of two Activity objects.
+   * Returns -1 if the first is earlier than the second.
+   * If the second is earlier, returns 1.
+   * If they are chronologically equivalent and first has
+   * a greater depth than the second, returns 1.
+   * If the second has a greater depth in this case, returns -1.
+   * Otherwise, 0 is returned.
+   * @param {Activity} first
+   * @param {Activity} second
+   * @returns {number}
+   */
+  function compareActivitiesBySchedule(first, second) {
+    // Compare chronological order of "schedule" property
+    const firstDate = dateFromSchedule(first.schedule);
+    const secondDate = dateFromSchedule(second.schedule);
+    if (firstDate.valueOf() < secondDate.valueOf())
+      return -1;
+    if (firstDate.valueOf() > secondDate.valueOf())
+      return 1;
+    // Chronologically equivalent: compare "schedule" property depth
+    const firstDepth = findScheduleDepth(first.schedule);
+    const secondDepth = findScheduleDepth(second.schedule);
+    if (firstDepth < secondDepth)
+      return -1;
+    if (firstDepth > secondDepth)
+      return 1;
+    // Equivalent "schedule" property
+    return 0;
   }
   // Manage UUIDs
   /**
@@ -279,7 +368,8 @@ const Model = (function () {
        // save local storage
       setActivitiesStore(schedulePropertiesMappedToActivityObjects);
     },
-    // fetchActivitiesBySchedule(schedule) {}
+    // fetchActivitiesBySchedule(schedule) {},
+    compareActivitiesBySchedule: compareActivitiesBySchedule,
     debug: {
       setActivitiesStore: setActivitiesStore,
       getActivitiesStore: getActivitiesStore,
