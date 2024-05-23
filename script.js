@@ -48,9 +48,8 @@ const Model = (function () {
    * Object describing properties and values used to filter Array<Activity>
    * @property {boolean?} checked_off
    */
-
+  // Constants
   const ACTIVITIES_STORAGE_KEY = "activities";
-  const uniqueIds = new Set();
   // Manage local storage
   /**
    * Set (or clear) local storage
@@ -303,8 +302,8 @@ const Model = (function () {
   // Manage UUIDs
   /**
    * Return a string id that is unique among
-   * all those currently in localStorage. Uses private
-   * "uniqueIds" Set object to track used ids.
+   * all those currently in localStorage. Uses
+   * "uniqueIds" runtime parameter.
    * @returns {string}
    */
   function getUniqueId() {
@@ -314,59 +313,110 @@ const Model = (function () {
     uniqueIds.add(id);
     return id;
   }
+  /**
+   * Read Activity objects from "activityArray".
+   * Add their "id" property and their object
+   * reference to runtime parameters.
+   * @param {Array<Activity>} activityArray
+   */
+  function loadActivityIdsFromArray(activityArray) {
+    for (const activity of activityArray) {
+      const id = activity.id;
+      uniqueIds.add(id);
+      idToActivityReference[id] = activity;
+    }
+  }
 
   // runtime parameters
-  let schedulePropertiesMappedToActivityObjects, groupIdsMappedToGroupObjects,
-    groupIdsMappedToActivityIds;
+  /**
+   * Used to track all UUIDs across all types
+   * of program-specific data structures.
+   * Intended to validate uniqueness when
+   * new IDs are assigned.
+   */
+  let uniqueIds = new Set();
+  /**
+   * Used as a source of truth for "up-to-date" direct
+   * information about Activity objects in LocalStorage.
+   * Changes at the same time that operations affecting
+   * saved data occur. Intended to reduce number of
+   * LocalStorage calls for single Activity reading
+   * operations.
+   * @type {Object<string, Activity>}
+   */
+  let idToActivityReference = {};
+  /**
+   * Used as a source of truth for "up-to-date" relational
+   * information about Activity objects in LocalStorage,
+   * based on the "schedule" property structure.
+   * Changes at the same time that operations affecting
+   * saved data occur. Intended to reduce number of
+   * LocalStorage calls for reading operations.
+   * @type {ScheduleToActivitiesTree}
+   */
+  let scheduleTreeToActivityArray;
+  /**
+   * Used as a source of truth for "up-to-date" direct
+   * information about Group objects in LocalStorage.
+   * Changes at the same time that operations affecting
+   * saved data occur. Intended to reduce number of
+   * LocalStorage calls for reading operations.
+   */
+  let idToGroupReference;
+  /**
+   * Used to quickly find Activity members
+   * of Group objects. Uses string "id" properties
+   * of both data structures.
+   */
+  let groupIdToActivityIdArray;
 
-  // load Activity data, then iterate and record each id
-  // this helps ensure uniqueness in runtime-generated UUIDs
-  schedulePropertiesMappedToActivityObjects = getActivitiesStore();
-  flattenScheduleTreeToActivitiesArray(schedulePropertiesMappedToActivityObjects).map( Activity => uniqueIds.add(Activity.id) );
+  // load Activity data
+  scheduleTreeToActivityArray = getActivitiesStore();
+  loadActivityIdsFromArray(flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray));
 
-  //...groupIdsMappedToGroupObjects = Object.fromEntries(...));
-  //...groupIdsMappedToActivityIds = ...
+  //...idToGroupReference = Object.fromEntries(...));
+  //...groupIdToActivityIdArray = ...
 
   return {
     /**
      * Add a new Activity to local storage as well as the
-     * "schedulePropertiesMappedToActivityObjects" runtime parameter
+     * "scheduleTreeToActivityArray" runtime parameter
      * @param {Activity} activity 
      */
     newActivity(activity) {
       activity.id = getUniqueId();
       // update runtime parameter
-      insertActivityIntoScheduleTree(schedulePropertiesMappedToActivityObjects, activity);
+      insertActivityIntoScheduleTree(scheduleTreeToActivityArray, activity);
       // save local storage
-      setActivitiesStore(schedulePropertiesMappedToActivityObjects);
+      setActivitiesStore(scheduleTreeToActivityArray);
     },
     // updateActivity(activity, priorSchedule) {},
     /**
      * Delete an Activity object from local storage as well as the
-     * "schedulePropertiesMappedToActivityObjects" runtime parameter
+     * "scheduleTreeToActivityArray" runtime parameter
      * @param {string} id - "id" property of Activity to be deleted
      */
     deleteActivity(id) {
       // find Activity object in ScheduleToActivitiesTree
-      let allActivitiesArray = flattenScheduleTreeToActivitiesArray(schedulePropertiesMappedToActivityObjects);
+      let allActivitiesArray = flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray);
       /**
        * worst case time complexity of next interpreted line: O(n),
        * where n is the total number of Activities
-       * in "schedulePropertiesMappedToActivityObjects"
+       * in "scheduleTreeToActivityArray"
        */
       let activity = allActivitiesArray.find( searchActivity => searchActivity.id === id );
       // find Activity's array index
-      let activityArrayInScheduleTree = findSpecificActivityArrayInScheduleTree(schedulePropertiesMappedToActivityObjects, activity.schedule);
+      let activityArrayInScheduleTree = findSpecificActivityArrayInScheduleTree(scheduleTreeToActivityArray, activity.schedule);
       /**
        * worst case time complexity of next interpreted line: O(m),
        * where m is the total number of Activities in the corresponding
-       * Activity array within "schedulePropertiesMappedToActivityObjects"
+       * Activity array within "scheduleTreeToActivityArray"
        */
       let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id );
       // delete Activity
       activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
        // save local storage
-      setActivitiesStore(schedulePropertiesMappedToActivityObjects);
+      setActivitiesStore(scheduleTreeToActivityArray);
     },
     // fetchActivitiesBySchedule(schedule) {},
     compareActivitiesBySchedule: compareActivitiesBySchedule,
