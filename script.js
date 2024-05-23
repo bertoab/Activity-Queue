@@ -697,6 +697,26 @@ const View = (argumentViewModel) => (function (vm) {
     return container;
   }
   /**
+   * Return a div containing pagination information.
+   * If a given parameter is not of 'string' type,
+   * a default value of "1" will be used.
+   * @param {string?} currentPage
+   * @param {string?} lastPossiblePage
+   */
+  function createPaginationInfo(currentPage, lastPossiblePage) {
+    if (typeof currentPage !== 'string')
+      currentPage = "1";
+    if (typeof lastPossiblePage !== 'string')
+      lastPossiblePage = "1";
+    const paginationDiv = document.createElement("div");
+    paginationDiv.classList.add("paginationInfo");
+    const infoSpan = document.createElement("span");
+    const text = `Page ${currentPage} of ${lastPossiblePage}`;
+    infoSpan.innerText = text;
+    paginationDiv.appendChild(infoSpan);
+    return paginationDiv;
+  }
+  /**
    * Accept "content" property of application DOMContext
    * and return the appropriately formatted HTMLElement
    * to display as the main content
