@@ -636,7 +636,7 @@ const View = (argumentViewModel) => (function (vm) {
    * @param {Array<Array<string>>} data - A two-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
    * @returns {HTMLElement}
    */
-  function tableContainer(cols, data, title) {
+  function createTableContainer(cols, data, title) {
     if (!Array.isArray(cols) || !Array.isArray(data))
       throw new TypeError("One or both arguments are non-array");
     let tableHTML = `<table>
@@ -669,7 +669,7 @@ const View = (argumentViewModel) => (function (vm) {
    * @param {Array<Array<string>} parameterData - Two-layer array; the inner arrays must contain either a single string value or 3 values, where the first index is a string corresponding to the name of the parameter, the second index is a string that is the visual index value of the parameter, and the third index is a string that is the id CSS attribute of the input element for the parameter
    * @returns {HTMLElement}
    */
-  function parametersContainer(parameterData) {
+  function createParametersContainer(parameterData) {
     // validate argument
     if (!Array.isArray(parameterData))
       throw new TypeError("unexpected parameter type");
@@ -727,9 +727,9 @@ const View = (argumentViewModel) => (function (vm) {
     //TODO: iterate "content" to support multiple containers in one DOMContext
     const container = content[0];
     if (container.type === "table")
-      return tableContainer(container.columnNames, container.data, container.title);
+      return createTableContainer(container.columnNames, container.data, container.title);
     if (container.type === "parameters")
-      return parametersContainer(container.data);
+      return createParametersContainer(container.data);
     throw new TypeError("unexpected parameter type");
   }
   /**
