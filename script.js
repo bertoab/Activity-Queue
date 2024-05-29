@@ -429,6 +429,107 @@ const Model = (function () {
 })();
 
 const ViewModel  = (argumentModel) => (function (m) {
+  /**
+   * @typedef {"table"} ValidContainerType
+   * Valid values of "type" property for Container.
+   * Indicates the format of "data" and other Container
+   * properties.
+   * @typedef {"main" | "modal"} ValidContextType
+   * Valid values of "type" property of State or
+   * DOMContext. Defines the DOM output div.
+   * The default value is "main".
+   *
+   * @typedef {Object.<string, Function>} FunctionMapping
+   * Maps keys as literal strings to be parsed from
+   * user input (via FunctionBar) to a value which
+   * is a corresponding function to execute. Keys
+   * must be uppercase alphabetical characters.
+   *
+   * @typedef {Object.<string, any>} ItemMapping
+   * Maps keys as literal strings to be parsed from
+   * user input (via FunctionBar) to a value which
+   * references (or is itself) a corresponding item
+   * for the program or a user function to act upon.
+   * Keys must be integers or uppercase alphabetical
+   * characters.
+   *
+   * @typedef {Object} Container
+   * Holds back-end or front-end information about
+   * a specific content segment of application state.
+   * @property {ValidContainerType} type
+   * @property {string?} title
+   * @property {Array<Array<string>>} data
+   *
+   * @typedef {Object} StateContainerProperties
+   * @property {FunctionMapping} functions
+   * @property {ItemMapping} items
+   * @property {true?} isLiteralData
+   * Determine whether "data" property has literal
+   * values for building "data" property in
+   * DOMContainer, or if lookups using Model are
+   * required. A non-true value indicates that
+   * "data" is non-literal.
+   * @property {string?} startingVisualIndex
+   * Define the literal index of the first item
+   * in "data". Can be any integer or a single
+   * alphabetical character. May also be used to
+   * assign "data" references in "itemMapping".
+   * @property {number?} currentPageIndex
+   * An integer defining the programmatic index
+   * (starting at 0) of the current page as set
+   * to be rendered in DOMContainer. A non-number
+   * value indicates that the DOMContainer should
+   * be rendered on the first (index = 0) page.
+   * @property {number?} maxPageItems
+   * An integer defining the maximum number of
+   * "data" items on a single DOMContainer page.
+   * A non-number value indicates that there
+   * should be no limit of items per page.
+   * @typedef {Container & StateContainerProperties} StateContainer
+   * Holds information used to generate a DOMContainer
+   * and determine FunctionBar behavior.
+   * Manipulated by ViewModel.
+   *
+   * @typedef {Object} DOMContainerProperties
+   * @property {string?} currentPageNumber
+   * A string representation of the current page,
+   * as intended to be rendered to the DOM.
+   * @property {string?} lastPageNumber
+   * A string representation of the last possible
+   * page, as intended to be rendered to the DOM.
+   * @typedef {Container & DOMContainerProperties} DOMContainer
+   * Holds information ready to be rendered in the DOM.
+   * Parsed by View to display content.
+   *
+   * @typedef {Object} TableContainerProperties
+   * @property {Array<string>} columnNames
+   * Contains the string names of each column to
+   * be rendered to the DOM.
+   * @typedef {Object} TableStateContainerProperties
+   * @property {Array<string>?} propertyNames
+   * Contains the string keys of each property
+   * to access for objects looked up in cases
+   * where "isLiteralData" is non-true (false).
+   * Must be correctly defined if "isLiteralData"
+   * is a non-true value. Indices and length
+   * must match with those of "columnNames".
+   * @typedef {StateContainer & TableContainerProperties & TableStateContainerProperties} TableStateContainer
+   * @typedef {DOMContainer & TableContainerProperties} TableDOMContainer
+   *
+   * @typedef {Object} State
+   * Back-end information used to keep track of
+   * current content and available user interactions.
+   * @property {ValidContextType} type
+   * @property {string?} title
+   * @property {Array<StateContainer>} content
+   *
+   * @typedef {Object} DOMContext
+   * Front-end information used to render current
+   * content to the DOM.
+   * @property {ValidContextType} type
+   * @property {string?} title
+   * @property {Array<DOMContainer>} content
+   */
   const model = m;
   const State = {};
   const DOMContext = {};
