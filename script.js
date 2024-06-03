@@ -1,7 +1,4 @@
-/**
- * Independent functions that can be used across
- * Model, ViewModel, and View.
- */
+/** @type {import("./types").HelperLibrary} */
 const helperLibrary = {
   isObject(arg) {
     return typeof arg === 'object' &&
@@ -9,52 +6,12 @@ const helperLibrary = {
     arg !== null
   }
 };
-
-/**
- * @typedef {{
- * year?: number,
- * month?: number,
- * day?: number,
- * hour?: number,
- * minute?: number
- * }} Schedule
- *
- * @typedef {{
- * id: string,
- * creation: string,
- * name?: string,
- * checked_off?: boolean,
- * schedule?: Schedule
- * }} Activity
- */
-
+/** @type {import("./types").Model} */
 const Model = (function () {
-  /**
-   * @typedef {Object} DaysToActivitiesMap
-   * @property {Array<Activity>} $day $day is an integer between 1 - 31
-   * @property {Array<Activity>} loose Activities without a valid schedule.day property
-   *
-   * @typedef {Object} MonthsAndDaysToActivitiesTree
-   * @property {DaysToActivitiesMap} $month $month is an integer between 1 - 12
-   * @property {Array<Activity>} loose Activities without a valid schedule.month property
-   *
-   * @typedef {Object} ScheduleToActivitiesTree
-   * Multi-level object containing arrays of Activities with year, month, and day
-   * from "schedule" property as keys (or "loose" if some or all of these properties are omitted)
-   * @property {MonthsAndDaysToActivitiesTree} $year A 4 digit integer
-   * @property {Array<Activity>} loose Activities without a valid schedule.year property
-   *
-   * @typedef {Object} ActivityFilter
-   * Object describing properties and values used to filter Array<Activity>
-   * @property {boolean?} checked_off
-   */
   // Constants
   const ACTIVITIES_STORAGE_KEY = "activities";
   // Manage local storage
-  /**
-   * Set (or clear) local storage
-   * @param {ScheduleToActivitiesTree?} scheduleTree - If non-object then an empty object is saved.
-   */
+  /** @type {import("./types".Model.Private.setActivitiesStore)} */
   const setActivitiesStore = (scheduleTree) => {
     if (!helperLibrary.isObject(scheduleTree)) {
       localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify({}));
@@ -62,11 +19,7 @@ const Model = (function () {
     }
     localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(scheduleTree));
   }
-  /**
-   * Read local storage and return its contents,
-   * or throw error if contents corrupted.
-   * @returns {ScheduleToActivitiesTree}
-   */
+  /** @type {import("./types".Model.Private.getActivitiesStore)} */
   const getActivitiesStore = () => {
     let loadedData = JSON.parse(localStorage.getItem(ACTIVITIES_STORAGE_KEY));
     if (loadedData === null) // uninitialized local storage
@@ -76,16 +29,7 @@ const Model = (function () {
     return loadedData;
   }
   // Manage ScheduleToActivitiesTree (and similar) structures
-  /**
-   * Traverse through "scheduleTree" and collect any Activities.
-   * Traverses from earliest scheduled Activity to latest (then "loose").
-   * By default, sorted with event occurring earliest in time at the
-   * beginning of the array. If any non-undefined value is present
-   * for the "latestFirst" parameter, the sorting order is reversed.
-   * @param {ScheduleToActivitiesTree} scheduleTree
-   * @param {undefined | true} latestFirst
-   * @returns {Array<Activity>}
-   */
+  /** @type {import("./types").Model.Private.flattenScheduleTreeToActivitiesArray} */
   function flattenScheduleTreeToActivitiesArray (scheduleTree, latestFirst) {
     let activitiesArray = [];
     recurseAndPushActivities(scheduleTree, activitiesArray);
@@ -107,18 +51,7 @@ const Model = (function () {
       });
     }
   }
-  /**
-   * Find and return a reference to a position
-   * within "scheduleTree" as described in "schedule".
-   * If a reference leading up to and including
-   * the final position as described in "schedule"
-   * is not defined within "scheduleTree",
-   * behavior depends on value of "fillGaps".
-   * @param {ScheduleToActivitiesTree} scheduleTree
-   * @param {Schedule | undefined} schedule
-   * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty objects/arrays where they are missing in "scheduleTree" (otherwise, a TypeError is thrown for property access on undefined)
-   * @returns {Array<Activity> | DaysToActivitiesMap | MonthsAndDaysToActivitiesTree | ScheduleToActivitiesTree | undefined}
-   */
+  /** @type {import("./types").Model.Private.findPositionInScheduleTree} */
   function findPositionInScheduleTree(scheduleTree, schedule, fillGaps) {
     // validate schedule, schedule["year"], and scheduleTree[schedule.year]
     if (typeof schedule === 'undefined' ||
@@ -148,16 +81,7 @@ const Model = (function () {
     }
     return scheduleTree[schedule.year][schedule.month][schedule.day];
   }
-  /**
-   * Traverse the "scheduleTree" parameter using fields
-   * found in the "schedule" parameter to return a
-   * corresponding Activity array. If a branch of "scheduleTree"
-   * is missing along the way, behavior depends on value of "fillGaps".
-   * @param {ScheduleToActivitiesTree} scheduleTree
-   * @param {Schedule | undefined} schedule
-   * @param {true | undefined} fillGaps - If non-undefined value, then causes function to create empty arrays/objects where they are missing in "scheduleTree" (otherwise, a TypeError is thrown for property retrieval on undefined)
-   * @returns {Array<Activity>} a reference encapsulated within "scheduleTree"
-   */
+  /** @type {import("./types").Model.Private.findSpecificActivityArrayInScheduleTree */
   function findSpecificActivityArrayInScheduleTree(scheduleTree, schedule, fillGaps) {
     const treePosition = findPositionInScheduleTree(scheduleTree, schedule, fillGaps);
     if (Array.isArray(treePosition)) {
@@ -170,30 +94,12 @@ const Model = (function () {
     }
     throw new TypeError("Position in scheduleTree is invalid type");
   }
-  /**
-   * Insert an Activity into a ScheduleToActivitiesTree.
-   * Ensure all branches of tree exist before insertion.
-   * @param {ScheduleToActivitiesTree} tree
-   * @param {Activity} activity
-   * @returns {number} - length of array that Activity was added into
-   */
+  /** @type {import("./types").Model.Private.insertActivityIntoScheduleTree */
   function insertActivityIntoScheduleTree(tree, activity) {
     return findSpecificActivityArrayInScheduleTree(tree, activity.schedule, true).push(activity);
   }
   // Manage Activity properties
-  /**
-   * Return an integer representing the number of
-   * valid subsequential levels found within "schedule".
-   * Validates that type of each property is "number".
-   * @param {Schedule} schedule
-   * @returns {number}
-   * - 0 = none
-   * - 1 = year
-   * - 2 = month
-   * - 3 = day
-   * - 4 = hour
-   * - 5 = minute
-   */
+  /** @type {import("./types").Model.Private.findScheduleDepth} */
   function findScheduleDepth(schedule) {
     if (typeof schedule === 'undefined' ||
         !helperLibrary.isObject(schedule) ||
@@ -211,13 +117,7 @@ const Model = (function () {
     // all "schedule" properties present
     return 5;
   }
-  /**
-   * Return a Date object representing closest chronological
-   * approximation to properties of "schedule". Assumes
-   * invalid "schedule" object to evaluate to Unix epoch.
-   * @param {Schedule} schedule
-   * @returns {Date}
-   */
+  /** @type {import("./types").Model.Private.dateFromSchedule} */
   function dateFromSchedule(schedule) {
     let depth = findScheduleDepth(schedule);
     if (depth === 0) {
@@ -240,16 +140,7 @@ const Model = (function () {
     return new Date(...params);
   }
   // Manage Array<Activity> structure
-  /**
-   * Filter "activityArray" and return a new array
-   * of the Activities passing the filter criteria.
-   * Will not replace any value for a property being
-   * tested on an Activity where it is "undefined".
-   * @param {Array<Activity>} activityArray
-   * @param {ActivityFilter} filter - Object specifying properties and values to use for filtering
-   * @param {boolean?} testForInequality - If the value is "true", then causes function to exclusively include Activities containing properties that do not equal those in "filter". For all other values, the function will exclusively include Activities containing properties that equal those in "filter".
-   * @returns {Array<Activity>}
-   */
+  /** @type {import("./types").Model.Private.filterActivityArray} */
   function filterActivityArray(activityArray, filter, testForInequality) {
     let filterTest; // configured to return "true" if an Activity's property passes the filter
     if (testForInequality === true) {
@@ -269,18 +160,7 @@ const Model = (function () {
     }
     return successfullyFiltered;
   }
-  /**
-   * Compare the "schedule" property of two Activity objects.
-   * Returns -1 if the first is earlier than the second.
-   * If the second is earlier, returns 1.
-   * If they are chronologically equivalent and first has
-   * a greater depth than the second, returns 1.
-   * If the second has a greater depth in this case, returns -1.
-   * Otherwise, 0 is returned.
-   * @param {Activity} first
-   * @param {Activity} second
-   * @returns {number}
-   */
+  /** @type {import("./types").Model.Private.compareActivitiesBySchedule} */
   function compareActivitiesBySchedule(first, second) {
     // Compare chronological order of "schedule" property
     const firstDate = dateFromSchedule(first.schedule);
@@ -300,12 +180,7 @@ const Model = (function () {
     return 0;
   }
   // Manage UUIDs
-  /**
-   * Return a string id that is unique among
-   * all those currently in localStorage. Uses
-   * "uniqueIds" runtime parameter.
-   * @returns {string}
-   */
+  /** @type {import("./types").Model.Private.getUniqueId} */
   function getUniqueId() {
     let id = crypto.randomUUID();
     while (uniqueIds.has(id))
@@ -313,12 +188,7 @@ const Model = (function () {
     uniqueIds.add(id);
     return id;
   }
-  /**
-   * Read Activity objects from "activityArray".
-   * Add their "id" property and their object
-   * reference to runtime parameters.
-   * @param {Array<Activity>} activityArray
-   */
+  /** @type {import("./types").Model.Private.loadActivityIdsFromArray} */
   function loadActivityIdsFromArray(activityArray) {
     for (const activity of activityArray) {
       const id = activity.id;
@@ -378,11 +248,6 @@ const Model = (function () {
   //...groupIdToActivityIdArray = ...
 
   return {
-    /**
-     * Add a new Activity to local storage as well as the
-     * "scheduleTreeToActivityArray" runtime parameter
-     * @param {Activity} activity 
-     */
     newActivity(activity) {
       activity.id = getUniqueId();
       // update runtime parameter
@@ -391,11 +256,6 @@ const Model = (function () {
       setActivitiesStore(scheduleTreeToActivityArray);
     },
     // updateActivity(activity, priorSchedule) {},
-    /**
-     * Delete an Activity object from local storage as well as the
-     * "scheduleTreeToActivityArray" runtime parameter
-     * @param {string} id - "id" property of Activity to be deleted
-     */
     deleteActivity(id) {
       // find Activity object in ScheduleToActivitiesTree
       let allActivitiesArray = flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray);
@@ -428,121 +288,14 @@ const Model = (function () {
   };
 })();
 
+/** @type {(argumentModel: import("./types").Model) => import("./types").ViewModel} */
 const ViewModel  = (argumentModel) => (function (m) {
-  /**
-   * @typedef {"table"} ValidContainerType
-   * Valid values of "type" property for Container.
-   * Indicates the format of "data" and other Container
-   * properties.
-   * @typedef {"main" | "modal"} ValidContextType
-   * Valid values of "type" property of State or
-   * DOMContext. Defines the DOM output div.
-   * The default value is "main".
-   *
-   * @typedef {Object.<string, Function>} FunctionMapping
-   * Maps keys as literal strings to be parsed from
-   * user input (via FunctionBar) to a value which
-   * is a corresponding function to execute. Keys
-   * must be uppercase alphabetical characters.
-   *
-   * @typedef {Object.<string, any>} ItemMapping
-   * Maps keys as literal strings to be parsed from
-   * user input (via FunctionBar) to a value which
-   * references (or is itself) a corresponding item
-   * for the program or a user function to act upon.
-   * Keys must be integers or uppercase alphabetical
-   * characters.
-   *
-   * @typedef {Object} Container
-   * Holds back-end or front-end information about
-   * a specific content segment of application state.
-   * @property {ValidContainerType} type
-   * @property {string?} title
-   * @property {Array<Array<string>>} data
-   *
-   * @typedef {Object} StateContainerProperties
-   * @property {FunctionMapping} functions
-   * @property {ItemMapping} items
-   * @property {true?} isLiteralData
-   * Determine whether "data" property has literal
-   * values for building "data" property in
-   * DOMContainer, or if lookups using Model are
-   * required. A non-true value indicates that
-   * "data" is non-literal.
-   * @property {string?} startingVisualIndex
-   * Define the literal index of the first item
-   * in "data". Can be any integer or a single
-   * alphabetical character. May also be used to
-   * assign "data" references in "itemMapping".
-   * @property {number?} currentPageIndex
-   * An integer defining the programmatic index
-   * (starting at 0) of the current page as set
-   * to be rendered in DOMContainer. A non-number
-   * value indicates that the DOMContainer should
-   * be rendered on the first (index = 0) page.
-   * @property {number?} maxPageItems
-   * An integer defining the maximum number of
-   * "data" items on a single DOMContainer page.
-   * A non-number value indicates that there
-   * should be no limit of items per page.
-   * @typedef {Container & StateContainerProperties} StateContainer
-   * Holds information used to generate a DOMContainer
-   * and determine FunctionBar behavior.
-   * Manipulated by ViewModel.
-   *
-   * @typedef {Object} DOMContainerProperties
-   * @property {string?} currentPageNumber
-   * A string representation of the current page,
-   * as intended to be rendered to the DOM.
-   * @property {string?} lastPageNumber
-   * A string representation of the last possible
-   * page, as intended to be rendered to the DOM.
-   * @typedef {Container & DOMContainerProperties} DOMContainer
-   * Holds information ready to be rendered in the DOM.
-   * Parsed by View to display content.
-   *
-   * @typedef {Object} TableContainerProperties
-   * @property {Array<string>} columnNames
-   * Contains the string names of each column to
-   * be rendered to the DOM.
-   * @typedef {Object} TableStateContainerProperties
-   * @property {Array<string>?} propertyNames
-   * Contains the string keys of each property
-   * to access for objects looked up in cases
-   * where "isLiteralData" is non-true (false).
-   * Must be correctly defined if "isLiteralData"
-   * is a non-true value. Indices and length
-   * must match with those of "columnNames".
-   * @typedef {StateContainer & TableContainerProperties & TableStateContainerProperties} TableStateContainer
-   * @typedef {DOMContainer & TableContainerProperties} TableDOMContainer
-   *
-   * @typedef {Object} State
-   * Back-end information used to keep track of
-   * current content and available user interactions.
-   * @property {ValidContextType} type
-   * @property {string?} title
-   * @property {Array<StateContainer>} content
-   *
-   * @typedef {Object} DOMContext
-   * Front-end information used to render current
-   * content to the DOM.
-   * @property {ValidContextType} type
-   * @property {string?} title
-   * @property {Array<DOMContainer>} content
-   */
   const model = m;
   const State = {};
   const DOMContext = {};
   let updateView;
   // Manage application State/DOMContext
-  /**
-   * Overwrite the application State based on
-   * properties of "StateChangeObject";
-   * allowed to overwrite some or all State properties.
-   * If "StateChangeObject.contentContainers" exists,
-   * DOM will be re-rendered.
-   * @param {{functionMapping?: Object, itemMapping?: Object, contentContainers?: Array<Object>}} StateChangeObject - An object containing string keys that are application State properties and appropriate values
-   */
+  /** @type {import("./types").ViewModel.Private.updateState} */
   function updateState(StateChangeObject) {
     const properties = Object.keys(StateChangeObject);
     if (properties.includes("functionMapping")) {
@@ -559,12 +312,7 @@ const ViewModel  = (argumentModel) => (function (m) {
       State.contentContainers = StateChangeObject.contentContainers;
     }
   }
-  /**
-   * Overwrite the application DOMContext based on
-   * properties of "DOMContextChangeObject";
-   * allowed to overwrite some or all DOMContext properties.
-   * @param {{type?: "main" | "modal", title?: string, content?: Array<Object>}} DOMContextChangeObject - An object containing string keys that are application DOMContext properties and appropriate values
-   */
+  /** @type {import("./types").ViewModel.Private.updateDOMContext} */
   function updateDOMContext(DOMContextChangeObject) {
     const properties = Object.keys(DOMContextChangeObject);
     if (properties.indexOf("type") !== -1) {
@@ -586,15 +334,7 @@ const ViewModel  = (argumentModel) => (function (m) {
       updateView();
   }
   // FunctionBar Input utilities
-  /**
-   * Search for all members of "strsToMatch"
-   * within "str". The first occurring member
-   * of "strsToMatch" is removed from "str".
-   * Assumes all strings in "strsToMatch" are uppercase.
-   * @param {string} str - The string to be searched
-   * @param {Array<string>} strsToMatch - An array of strings to be searched for in "str"
-   * @returns {[string, Array<string>]} - A tuple; index 0 contains "str" after the first matched string has been removed & index 1 contains an array of each matched string
-   */
+  /** @type {import("./types").ViewModel.Private.removeFirstMatchAndReturnOrderedMatches} */
   function removeFirstMatchAndReturnOrderedMatches(str, strsToMatch) {
     if (!Array.isArray(strsToMatch))
       throw new TypeError("unexpected parameter type");
@@ -608,14 +348,7 @@ const ViewModel  = (argumentModel) => (function (m) {
     return [str, strsToMatch];
   }
   // Generate State/DOMContext objects
-  /**
-   * Return a DOMContext object for an error.
-   * The DOMContext is a modal type with
-   * the title "Error" and the passed
-   * message as the content.
-   * @param {string} message - The error message to be displayed
-   * @returns {{type: "modal", title: "Error", content: message}}
-   */
+  /** @type {import("./types").ViewModel.Private.errorDOMContext} */
   function errorDOMContext(message) {
     if (typeof message !== 'string')
       throw new TypeError("unexpected parameter type");
@@ -675,16 +408,6 @@ const ViewModel  = (argumentModel) => (function (m) {
       State: State,
       mainMenu: mainMenu
     },
-    /**
-     * Check for "Enter" keypress, then trim and split
-     * input string by comma (",") delimiter, then remove
-     * first matched acronym string (from State.functionMapping)
-     * in the input, then ensure remaining characters
-     * in first delimited string are digits,
-     * then execute matched user function with
-     * split input string array as arguments
-     * @param {Event} event - The Event object passed from the fired event listener
-     */
     handleFunctionBarKeypressEventAndExecuteUserFunction(event) {
       let inputArray = event.target.value.split(",").map(str => str.trim()); // split raw input by "," delimiter and trim trailing whitespace
       if (event.key === 'Enter') { // validate for a user function
@@ -702,10 +425,6 @@ const ViewModel  = (argumentModel) => (function (m) {
         } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
       }
     },
-    /**
-     * Set the function used by the ViewModel to request a DOM update. If it has not been defined previously, then it will be executed (for initial DOM render).
-     * @param {Function} func 
-     */
     setUpdateView(func) {
       if (typeof updateView === 'undefined')
         func();
@@ -714,14 +433,11 @@ const ViewModel  = (argumentModel) => (function (m) {
   };
 })(argumentModel);
 
+/** @type {(argumentViewModel: import("./types").ViewModel) => import("./types").View} */
 const View = (argumentViewModel) => (function (vm) {
   const viewModel = vm;
   
-  /**
-   * Create a styled "h2"
-   * @param {string} value - The title string to display in the heading
-   * @returns {HTMLElement} - The "h2" element
-   */
+  /** @type {import("./types").View.Private.createHeading} */
   function createHeading(value) {
     if (typeof value !== 'string')
       throw new TypeError("unexpected parameter type"); //TODO: implement support for Array<HTMLElement>
@@ -729,14 +445,7 @@ const View = (argumentViewModel) => (function (vm) {
     headerDiv.innerText = value;
     return headerDiv;
   }
-  /**
-   * Return a div containing an HTML table element based on
-   * an array of arrays, accepting a single-layer array for
-   * the columns and a two-layer array for the data 
-   * @param {Array<string>} cols - An array of strings to name the table columns
-   * @param {Array<Array<string>>} data - A two-layer array containing strings within; for a symmetric, gap-less table, the length of every inner array should be equal to that of "cols"
-   * @returns {HTMLElement}
-   */
+  /** @type {import("./types").View.Private.createTableContainer} */
   function createTableContainer(cols, data, title) {
     if (!Array.isArray(cols) || !Array.isArray(data))
       throw new TypeError("One or both arguments are non-array");
@@ -763,13 +472,7 @@ const View = (argumentViewModel) => (function (vm) {
     container.insertAdjacentHTML("beforeend", tableHTML);
     return container;
   }
-  /**
-   * Return an HTML div element containing parameter information,
-   * based on an array of arrays detailing their names,
-   * visual string indexes, and CSS id attributes
-   * @param {Array<Array<string>} parameterData - Two-layer array; the inner arrays must contain either a single string value or 3 values, where the first index is a string corresponding to the name of the parameter, the second index is a string that is the visual index value of the parameter, and the third index is a string that is the id CSS attribute of the input element for the parameter
-   * @returns {HTMLElement}
-   */
+  /** @type {import("./types").View.Private.createParametersContainer} */
   function createParametersContainer(parameterData) {
     // validate argument
     if (!Array.isArray(parameterData))
@@ -797,13 +500,7 @@ const View = (argumentViewModel) => (function (vm) {
     }
     return container;
   }
-  /**
-   * Return a div containing pagination information.
-   * If a given parameter is not of 'string' type,
-   * a default value of "1" will be used.
-   * @param {string?} currentPage
-   * @param {string?} lastPossiblePage
-   */
+  /** @type {import("./types").View.Private.createPaginationInfo} */
   function createPaginationInfo(currentPage, lastPossiblePage) {
     if (typeof currentPage !== 'string')
       currentPage = "1";
@@ -817,13 +514,7 @@ const View = (argumentViewModel) => (function (vm) {
     paginationDiv.appendChild(infoSpan);
     return paginationDiv;
   }
-  /**
-   * Accept "content" property of application DOMContext
-   * and return the appropriately formatted HTMLElement
-   * to display as the main content
-   * @param {Array} content
-   * @returns {HTMLElement}
-   */
+  /** @type {import("./types").View.Private.createContentDiv} */
   function createContentDiv(content) {
     //TODO: iterate "content" to support multiple containers in one DOMContext
     const container = content[0];
@@ -833,12 +524,7 @@ const View = (argumentViewModel) => (function (vm) {
       return createParametersContainer(container.data);
     throw new TypeError("unexpected parameter type");
   }
-  /**
-   * Create HTML elements for the FunctionBar component
-   * and attach a "keypress" listener to validate and
-   * execute on input (via a ViewModel callback function)
-   * @returns {HTMLElement} - The "div" element, containing the "input" element
-   */
+  /** @type {import("./types").View.Private.createPaginationInfo} */
   function createFunctionBarAndAttachKeyPressHandler() {
     // Create necessary HTMLElements
     const div = document.createElement("div");
@@ -852,12 +538,7 @@ const View = (argumentViewModel) => (function (vm) {
     return div;
   }
 
-  /**
-   * Draw the current application DOMContext
-   * to the screen. Remove all elements from
-   * the current DOMContext div (determined by
-   * "type" DOMContext property) before drawing
-   */
+  /** @type {import("./types").View.Private.render} */
   function render() {
     // select DOMContext div
     let DOMContextDiv;
