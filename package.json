@@ -1,5 +1,6 @@
 {
   "main": "script.test.ts",
+  "types": "./types/index.d.ts",
   "scripts": {
     "start": "python3 -m http.server --directory ./",
     "test": "jest"
