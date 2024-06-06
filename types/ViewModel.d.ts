@@ -122,6 +122,8 @@ export declare namespace ViewModel {
     type: ValidContextType;
     title?: string;
     content: Array<StateContainer>;
+    functionMapping: FunctionMapping;
+    itemMapping: ItemMapping;
   }
   /**
    * Front-end information used to render current
