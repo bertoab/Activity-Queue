@@ -248,6 +248,9 @@ const Model = (function () {
   //...groupIdToActivityIdArray = ...
 
   return {
+    getActivity(id) {
+      return idToActivityReference[id];
+    },
     newActivity(activity) {
       activity.id = getUniqueId();
       // update runtime parameters

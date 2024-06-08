@@ -149,6 +149,11 @@ export declare namespace Model {
     function loadActivityIdsFromArray(activityArray: Array<Activity>): void;
   }
   /**
+   * Use "id" to lookup and return a reference to
+   * an Activity object within runtime parameters.
+   */
+  function getActivity(id: string): Activity;
+  /**
    * Add a new Activity to local storage as well as
    * runtime parameters.
    */
