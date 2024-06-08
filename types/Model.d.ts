@@ -149,13 +149,13 @@ export declare namespace Model {
     function loadActivityIdsFromArray(activityArray: Array<Activity>): void;
   }
   /**
-   * Add a new Activity to local storage as well as the
-   * "scheduleTreeToActivityArray" runtime parameter
+   * Add a new Activity to local storage as well as
+   * runtime parameters.
    */
   function newActivity(activity: Activity): void;
   /**
-   * Delete an Activity object from local storage as well as the
-   * "scheduleTreeToActivityArray" runtime parameter
+   * Delete an Activity object from local storage as
+   * well as runtime parameters.
    * @param id - "id" property of Activity to be deleted
    */
   function deleteActivity(id: string): void;

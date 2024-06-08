@@ -250,8 +250,9 @@ const Model = (function () {
   return {
     newActivity(activity) {
       activity.id = getUniqueId();
-      // update runtime parameter
+      // update runtime parameters
       insertActivityIntoScheduleTree(scheduleTreeToActivityArray, activity);
+      idToActivityReference[activity.id] = activity;
       // save local storage
       setActivitiesStore(scheduleTreeToActivityArray);
     },
@@ -273,8 +274,9 @@ const Model = (function () {
        * Activity array within "scheduleTreeToActivityArray"
        */
       let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id );
-      // delete Activity
+      // delete Activity from runtime parameters
       activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
+      delete idToActivityReference[id];
        // save local storage
       setActivitiesStore(scheduleTreeToActivityArray);
     },
