@@ -11,7 +11,7 @@ const Model = (function () {
   // Constants
   const ACTIVITIES_STORAGE_KEY = "activities";
   // Manage local storage
-  /** @type {import("./types".Model.Private.setActivitiesStore)} */
+  /** @type {import("./types").Model.Private.setActivitiesStore} */
   const setActivitiesStore = (scheduleTree) => {
     if (!helperLibrary.isObject(scheduleTree)) {
       localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify({}));
@@ -19,7 +19,7 @@ const Model = (function () {
     }
     localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(scheduleTree));
   }
-  /** @type {import("./types".Model.Private.getActivitiesStore)} */
+  /** @type {import("./types").Model.Private.getActivitiesStore} */
   const getActivitiesStore = () => {
     let loadedData = JSON.parse(localStorage.getItem(ACTIVITIES_STORAGE_KEY));
     if (loadedData === null) // uninitialized local storage
@@ -81,7 +81,7 @@ const Model = (function () {
     }
     return scheduleTree[schedule.year][schedule.month][schedule.day];
   }
-  /** @type {import("./types").Model.Private.findSpecificActivityArrayInScheduleTree */
+  /** @type {import("./types").Model.Private.findSpecificActivityArrayInScheduleTree} */
   function findSpecificActivityArrayInScheduleTree(scheduleTree, schedule, fillGaps) {
     const treePosition = findPositionInScheduleTree(scheduleTree, schedule, fillGaps);
     if (Array.isArray(treePosition)) {
@@ -94,7 +94,7 @@ const Model = (function () {
     }
     throw new TypeError("Position in scheduleTree is invalid type");
   }
-  /** @type {import("./types").Model.Private.insertActivityIntoScheduleTree */
+  /** @type {import("./types").Model.Private.insertActivityIntoScheduleTree} */
   function insertActivityIntoScheduleTree(tree, activity) {
     return findSpecificActivityArrayInScheduleTree(tree, activity.schedule, true).push(activity);
   }
