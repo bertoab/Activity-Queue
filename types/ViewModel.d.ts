@@ -137,21 +137,25 @@ export declare namespace ViewModel {
   namespace Private {
     // Manage application State/DOMContext
     /**
+     * Set State.functionMapping to configure
+     * FunctionBar user functions.
+     */
+    function useFunctionState(functionMapping: FunctionMapping): void;
+    /**
+     * Set State.itemMapping to configure
+     * FunctionBar items for user functions.
+     */
+    function useItemState(itemMapping: ItemMapping): void;
+    /**
      * Overwrite the application State based on
      * properties of "StateChangeObject";
-     * allowed to overwrite some or all State properties.
-     * If "StateChangeObject.contentContainers" exists,
-     * DOM will be re-rendered.
+     * allowed to overwrite all State properties
+     * except "itemMapping" and "functionMapping".
+     * Application DOMContext will be regenerated
+     * and the DOM will be re-rendered.
      * @param StateChangeObject - An object containing string keys that are application State properties and appropriate values
      */
-    function updateState(StateChangeObject: {functionMapping?: FunctionMapping, itemMapping?: ItemMapping, contentContainers?: Array<StateContainer>}): void;
-    /**
-     * Overwrite the application DOMContext based on
-     * properties of "DOMContextChangeObject";
-     * allowed to overwrite some or all DOMContext properties.
-     * @param DOMContextChangeObject - An object containing string keys that are application DOMContext properties and appropriate values
-     */
-    function updateDOMContext(DOMContextChangeObject: {type?: ValidContextType, title?: string, content?: Array<DOMContainer>}): void;
+    function updateState(StateChangeObject: {type: ValidContextType, title?: string, content: Array<StateContainer>}): void;
 
     // FunctionBar input utilities
     /**
@@ -167,13 +171,45 @@ export declare namespace ViewModel {
 
     // Generate State/DOMContext objects
     /**
-     * Return a DOMContext object for an error.
-     * The DOMContext is a modal type with
+     * Use first and second indices of each inner
+     * array of "data" property to create a key
+     * (first index) to value (second index)
+     * association for an ItemMapping.
+     */
+    function createItemMappingFromContainerData(data: Container["data"]): ItemMapping;
+    /**
+     * Generate a deep copy of "data" using JSON
+     * API (all "data" values must be JSON
+     * compatible). Conditionally prefix datum
+     * with a string index as deteremined by
+     * "startingVisualIndex".
+     * @param startingVisualIndex - If non-string value, "data" is returned without any copy or changes.
+     */
+    function generateContainerDataIndices (data: Container["data"], startingVisualIndex: StateContainer["startingVisualIndex"]): DOMContainer["data"];
+    /**
+     * Conditionally modify "data" property and
+     * State.itemMapping as according to
+     * parameters. Translations for non-literal
+     * datum will be done by interpreting the 0th
+     * index as a string ID value for an Activity;
+     * Model is used to fetch corresponding object
+     * for property information.
+     */
+    function configureTableContainerData(data: Container["data"], isLiteralData: StateContainer.isLiteralData, startingVisualIndex: StateContainer.startingVisualIndex, propertyNames: TableStateContainer.propertyNames): TableDOMContainer["data"];
+    /**
+     * Use "stateContainer" to create a
+     * DOMContainer, and update
+     * State.functionMapping and State.itemMapping.
+     */
+    function initializeDOMContainer(stateContainer: StateContainer): DOMContainer;
+    /**
+     * Return a State object for an error.
+     * The State is a modal type with
      * the title "Error" and the passed
      * message as the content.
      * @param message - The error message to be displayed
      */
-    function errorDOMContext(message: string): {type: "modal", title: "Error", message: string};
+    function errorState(message: string): State;
   }
   /**
    * Check for "Enter" keypress, then trim and split

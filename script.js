@@ -300,43 +300,31 @@ const ViewModel  = (argumentModel) => (function (m) {
   const DOMContext = {};
   let updateView;
   // Manage application State/DOMContext
+  /** @type {import("./types").ViewModel.Private.useFunctionState} */
+  function useFunctionState(functionMapping) {
+    State.functionMapping = functionMapping;
+  }
+  /** @type {import("./types").ViewModel.Private.useItemState} */
+  function useItemState(itemMapping) {
+    State.itemMapping = itemMapping;
+  }
   /** @type {import("./types").ViewModel.Private.updateState} */
   function updateState(StateChangeObject) {
-    const properties = Object.keys(StateChangeObject);
-    if (properties.includes("functionMapping")) {
-      if (!helperLibrary.isObject(StateChangeObject.functionMapping))
-        throw new TypeError("unexpected State property type");
-      State.functionMapping = StateChangeObject.functionMapping;
+    if (typeof StateChangeObject.functionMapping !== 'undefined' ||
+        typeof StateChangeObject.itemMapping !== 'undefined') {
+      throw new TypeError("unexpected State property. Try calling useItemState and/or useItemMapping instead.");
     }
-    if (properties.includes("itemMapping")) {
-      if (!helperLibrary.isObject(StateChangeObject.itemMapping))
-        throw new TypeError("unexpected State property type");
-      State.itemMapping = StateChangeObject.itemMapping;
-    }
-    if (properties.includes("contentContainers")) {
-      State.contentContainers = StateChangeObject.contentContainers;
-    }
-  }
-  /** @type {import("./types").ViewModel.Private.updateDOMContext} */
-  function updateDOMContext(DOMContextChangeObject) {
-    const properties = Object.keys(DOMContextChangeObject);
-    if (properties.indexOf("type") !== -1) {
-      if (typeof DOMContextChangeObject.type !== 'string')
-        throw new TypeError("unexpected DOMContext property type");
-      DOMContext.type = DOMContextChangeObject.type;
-    }
-    if (properties.indexOf("title") !== -1) {
-      if (typeof DOMContextChangeObject.title !== 'string')
-        throw new TypeError("unexpected DOMContext property type");
-      DOMContext.title = DOMContextChangeObject.title;
-    }
-    if (properties.indexOf("content") !== -1) {
-      //TODO: "content" validation
-      DOMContext.content = DOMContextChangeObject.content;
-    }
-
+    Object.assign(State, StateChangeObject);
+    // prepare and initiate render
+    const stateAsDOMContext = {
+      type: State.type,
+      title: State.title,
+      content: [ initializeDOMContainer(State.content[0]) ]
+    };
+    Object.assign(DOMContext, stateAsDOMContext);
     if (typeof updateView === 'function')
       updateView();
+    return;
   }
   // FunctionBar Input utilities
   /** @type {import("./types").ViewModel.Private.removeFirstMatchAndReturnOrderedMatches} */
@@ -353,8 +341,75 @@ const ViewModel  = (argumentModel) => (function (m) {
     return [str, strsToMatch];
   }
   // Generate State/DOMContext objects
-  /** @type {import("./types").ViewModel.Private.errorDOMContext} */
-  function errorDOMContext(message) {
+  /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
+  function createItemMappingFromContainerData(data) {
+    const mapping = {};
+    for (const datum of data)
+    { mapping[datum[0]] = datum[1] }
+    return mapping;
+  }
+  /** @type {import("./types").ViewModel.Private.generateContainerDataIndices} */
+  function generateContainerDataIndices(data, startingVisualIndex) {
+    if (typeof startingVisualIndex !== 'string')
+      return data;
+    data = JSON.parse(JSON.stringify(data)); // deep copy. all values must be JSON compatible!
+    if (!Number.isNaN(Number.parseInt(startingVisualIndex))) {
+      let currentIndexPrefix = Number.parseInt(startingVisualIndex);
+      for (const datum of data)
+        { datum.unshift(currentIndexPrefix++); }
+    }
+    const startingCharCode = startingVisualIndex.charCodeAt(0);
+    if (startingCharCode >= 65 && startingCharCode <= 90) { // uppercase alphabetical letters: "A" - "Z"
+      let currentCharCode = startingCharCode;
+      for (const datum of data) {
+        datum.unshift(String.fromCharCode(currentCharCode));
+        const nextCode = currentCharCode + 1; // will behave unexpectedly where this value becomes > 90
+        currentCharCode = nextCode;
+      }
+    }
+    return data;
+  }
+  /** @type {import("./types").ViewModel.Private.configureTableContainerData} */
+  function configureTableContainerData(data, isLiteralData, startingVisualIndex, propertyNames) {
+    if (isLiteralData !== true) {
+      const idIndex = typeof startingVisualIndex === 'undefined' ? 0 : 1;
+      for (const datum of data) {
+        const id = datum[idIndex];
+        const activity = Model.getActivity(id);
+        const selectedActivityProperties = [];
+        let offset = idIndex; // prevent truncation of item index string
+        for (const propertyName of propertyNames)
+          { selectedActivityProperties.push(activity[propertyName]) }
+        for (const activityPropertyValue of selectedActivityProperties)
+          { datum[offset++] = activityPropertyValue }
+      }
+    }
+    return data;
+  }
+  /** @type {import("./types").ViewModel.Private.initializeDOMContainer} */
+  function initializeDOMContainer(stateContainer) {
+    const DOMContainer = {
+      type: stateContainer.type,
+      title: stateContainer.title,
+    };
+    useFunctionState(stateContainer.functions); // side effect
+    DOMContainer.data = generateContainerDataIndices(stateContainer.data, stateContainer.startingVisualIndex);
+    if (typeof stateContainer.startingVisualIndex === 'string')
+      useItemState(createItemMappingFromContainerData(DOMContainer.data)); // side effect
+    switch (DOMContainer.type) {
+      case "table":
+        DOMContainer.columnNames = stateContainer.columnNames;
+        DOMContainer.data = configureTableContainerData(
+          DOMContainer.data, stateContainer.isLiteralData,
+          stateContainer.startingVisualIndex, stateContainer.propertyNames);
+        break;
+      default:
+        break;
+    }
+    return DOMContainer;
+  }
+  /** @type {import("./types").ViewModel.Private.errorState} */
+  function errorState(message) {
     if (typeof message !== 'string')
       throw new TypeError("unexpected parameter type");
     return {
@@ -363,47 +418,34 @@ const ViewModel  = (argumentModel) => (function (m) {
       content: [{
         type: "table",
         columnNames: ["Message(s)"],
-        data: [[message]]
+        data: [[message]],
+        isLiteralData: true
       }]
     };
   }
   // Hard-coded State/DOMContext objects
   const mainMenu = {
     State: {
-      contentContainers: [{
-        type: "table",
-        title: undefined,
-        columnNames: ["Options"],
-        data: [["Add task"], ["View history"], ["View archived"]],
-        functions: [() => document.getElementById("modal-container").style.display = "flex", () => alert("You selected: View history"), () => alert("You selected: View archived")],
-        isLiteralData: true,
-        startingVisualIndex: 1,
-        currentPageIndex: 0,
-        maxPageItems: 15
-      }],
-      functionMapping: {
-        "1": () => document.getElementById("modal-container").style.display = "flex",
-        "2": () => alert("You selected: View history"),
-        "3": () => alert("You selected: View archived"),
-      }
-    },
-    DOMContext: {
       type: "main",
       title: "Main Menu",
-      content: [
-        {
-          type: "table",
-          title: undefined,
-          columnNames: ["Index", "Options"],
-          currentPage: "1",
-          lastPageNumber: "1",
-          data: [["1", "Add task"], ["2", "View history"], ["3", "View archived"]]
-        }
-      ]
+      content: [{
+        type: "table",
+        title: undefined,
+        columnNames: ["Index", "Options"],
+        data: [["Add task"], ["View history"], ["View archived"]],
+        functions: {
+          "1": () => document.getElementById("modal-container").style.display = "flex",
+          "2": () => alert("You selected: View history"),
+          "3": () => alert("You selected: View archived"),
+        },
+        isLiteralData: true,
+        startingVisualIndex: "1",
+        currentPageIndex: 0,
+        maxPageItems: 15
+      }]
     }
   };
   // Initialize application to main menu State/DOMContext
-  updateDOMContext(mainMenu.DOMContext);
   updateState(mainMenu.State);
 
   // Public definitions
@@ -424,7 +466,7 @@ const ViewModel  = (argumentModel) => (function (m) {
           else { // ensure remaining string of inputArray[0] contains digits (0-9)
             for (let i = 0; i < inputArray[0].length; i++)
               if (inputArray[0].charCodeAt(i) < 48 || inputArray[0].charCodeAt(i) > 57)
-                return updateDOMContext(errorDOMContext("Invalid Input"));
+                return updateState(errorState("Invalid Input"));
           }
           State.functionMapping[matchedFunctions[0]](...inputArray);
         } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
