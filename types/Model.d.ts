@@ -124,15 +124,15 @@ export declare namespace Model {
      */
     function filterActivityArray(activityArray: Array<Activity>, filter: ActivityFilter, testForInequality?: true): Array<Activity>;
     /**
-     * Compare the "schedule" property of two Activity objects.
-     * Returns -1 if the first is earlier than the second.
+     * Compare the "schedule" parameters. Returns
+     * -1 if the first is earlier than the second.
      * If the second is earlier, returns 1.
      * If they are chronologically equivalent and first has
      * a greater depth than the second, returns 1.
      * If the second has a greater depth in this case, returns -1.
      * Otherwise, 0 is returned.
      */
-    function compareActivitiesBySchedule(first: Activity, second: Activity): number;
+    function compareSchedules(first: Schedule, second: Schedule): number;
 
     // Manage UUIDs
     /**

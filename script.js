@@ -160,18 +160,18 @@ const Model = (function () {
     }
     return successfullyFiltered;
   }
-  /** @type {import("./types").Model.Private.compareActivitiesBySchedule} */
-  function compareActivitiesBySchedule(first, second) {
+  /** @type {import("./types").Model.Private.compareSchedules} */
+  function compareSchedules(first, second) {
     // Compare chronological order of "schedule" property
-    const firstDate = dateFromSchedule(first.schedule);
-    const secondDate = dateFromSchedule(second.schedule);
+    const firstDate = dateFromSchedule(first);
+    const secondDate = dateFromSchedule(second);
     if (firstDate.valueOf() < secondDate.valueOf())
       return -1;
     if (firstDate.valueOf() > secondDate.valueOf())
       return 1;
     // Chronologically equivalent: compare "schedule" property depth
-    const firstDepth = findScheduleDepth(first.schedule);
-    const secondDepth = findScheduleDepth(second.schedule);
+    const firstDepth = findScheduleDepth(first);
+    const secondDepth = findScheduleDepth(second);
     if (firstDepth < secondDepth)
       return -1;
     if (firstDepth > secondDepth)
@@ -284,7 +284,7 @@ const Model = (function () {
       setActivitiesStore(scheduleTreeToActivityArray);
     },
     // fetchActivitiesBySchedule(schedule) {},
-    compareActivitiesBySchedule: compareActivitiesBySchedule,
+    compareSchedules: compareSchedules,
     debug: {
       setActivitiesStore: setActivitiesStore,
       getActivitiesStore: getActivitiesStore,
