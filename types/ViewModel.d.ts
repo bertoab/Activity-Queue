@@ -147,12 +147,12 @@ export declare namespace ViewModel {
      */
     function useItemState(itemMapping: ItemMapping): void;
     /**
-     * Overwrite the application State based on
-     * properties of "StateChangeObject";
+     * Conditionally overwrite the application State
+     * based on properties of "StateChangeObject";
      * allowed to overwrite all State properties
      * except "itemMapping" and "functionMapping".
-     * Application DOMContext will be regenerated
-     * and the DOM will be re-rendered.
+     * On every call, application DOMContext will
+     * be regenerated and the DOM will be re-rendered.
      * @param StateChangeObject - An object containing string keys that are application State properties and appropriate values
      */
     function updateState(StateChangeObject: {type: ValidContextType, title?: string, content: Array<StateContainer>}): void;

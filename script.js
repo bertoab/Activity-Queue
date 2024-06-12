@@ -310,11 +310,13 @@ const ViewModel  = (argumentModel) => (function (m) {
   }
   /** @type {import("./types").ViewModel.Private.updateState} */
   function updateState(StateChangeObject) {
-    if (typeof StateChangeObject.functionMapping !== 'undefined' ||
-        typeof StateChangeObject.itemMapping !== 'undefined') {
-      throw new TypeError("unexpected State property. Try calling useItemState and/or useItemMapping instead.");
+    if (helperLibrary.isObject(StateChangeObject)) { // change State
+      if (typeof StateChangeObject.functionMapping !== 'undefined' ||
+          typeof StateChangeObject.itemMapping !== 'undefined') {
+        throw new TypeError("unexpected State property. Try calling useItemState and/or useItemMapping instead.");
+      }
+      Object.assign(State, StateChangeObject);
     }
-    Object.assign(State, StateChangeObject);
     // prepare and initiate render
     const stateAsDOMContext = {
       type: State.type,
