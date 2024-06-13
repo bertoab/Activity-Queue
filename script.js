@@ -30,10 +30,10 @@ const Model = (function () {
   }
   // Manage ScheduleToActivitiesTree (and similar) structures
   /** @type {import("./types").Model.Private.flattenScheduleTreeToActivitiesArray} */
-  function flattenScheduleTreeToActivitiesArray (scheduleTree, latestFirst) {
+  function flattenScheduleTreeToActivitiesArray (scheduleTree) {
     let activitiesArray = [];
     recurseAndPushActivities(scheduleTree, activitiesArray);
-    return typeof latestFirst === 'undefined' ? activitiesArray : activitiesArray.reverse();
+    return activitiesArray;
 
     /** Iterate over values of "obj", 
      * recursing if another object is

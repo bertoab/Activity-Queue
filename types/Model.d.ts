@@ -59,13 +59,12 @@ export declare namespace Model {
 
     // Manage ScheduleToActivitiesTree (and similar) structures
     /**
-     * Traverse through "scheduleTree" and collect any Activities.
-     * Traverses from earliest scheduled Activity to latest (then "loose").
-     * By default, sorted with event occurring earliest in time at the
-     * beginning of the array. If any non-undefined value is present
-     * for the "latestFirst" parameter, the sorting order is reversed.
+     * Traverse through "scheduleTree" and collect
+     * any Activity objects. Array is returned
+     * unsorted (order is determined by recursive
+     * Object.values calls).
      */
-    function flattenScheduleTreeToActivitiesArray(scheduleTree: ScheduleToActivitiesTree, latestFirst?: true): Array<Activity>;
+    function flattenScheduleTreeToActivitiesArray(scheduleTree: ScheduleToActivitiesTree): Array<Activity>;
     /**
      * Find and return a reference to a position
      * within "scheduleTree" as described in "schedule".
