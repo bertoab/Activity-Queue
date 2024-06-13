@@ -39,7 +39,7 @@ export declare namespace Model {
   }
   /**
    * Object describing properties and values
-   * used to filter Array<Activity\>
+   * used to filter Array<Activity>
    */
   interface ActivityFilter {
     checked_off?: boolean;
