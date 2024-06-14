@@ -283,6 +283,18 @@ const Model = (function () {
        // save local storage
       setActivitiesStore(scheduleTreeToActivityArray);
     },
+    getActivityIdArray(sort, filter) {
+      let activities = flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray);
+      if (!helperLibrary.isObject(sort) || sort.scheduleAscending !== true)
+        activities = activities.sort( (a, b) => compareSchedules(b.schedule, a.schedule) );
+      else
+        activities = activities.sort( (a, b) => compareSchedules(a.schedule, b.schedule) );
+      if (helperLibrary.isObject(filter) && typeof filter.checked_off === 'boolean') {
+        activities = activities.filter( activity => activity.checked_off === filter.checked_off );
+      }
+      //TODO: implement more filter options
+      return activities.map( activity => activity.id );
+    },
     // fetchActivitiesBySchedule(schedule) {},
     compareSchedules: compareSchedules,
     debug: {

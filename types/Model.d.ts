@@ -44,6 +44,19 @@ export declare namespace Model {
   interface ActivityFilter {
     checked_off?: boolean;
   }
+  /**
+   * Object describing properties and values
+   * used to sort Array<Activity>
+   */
+  interface ActivitySort {
+    /**
+     * When this property is "true", the array
+     * will be sorted with the Activity that has
+     * the "schedule" property occurring chronologically
+     * earliest starting at index 0.
+     */
+    scheduleAscending?: true;
+  }
   namespace Private {
     // Manage local storage
     /**
@@ -163,4 +176,10 @@ export declare namespace Model {
    * @param id - "id" property of Activity to be deleted
    */
   function deleteActivity(id: string): void;
+  /**
+   * Return an array of Activity "id" values using
+   * the Model. The array is sorted and filtered
+   * according to parameters.
+   */
+  function getActivityIdArray(sort?: ActivitySort, filter?: ActivityFilter): Array<Activity.id>;
 }
