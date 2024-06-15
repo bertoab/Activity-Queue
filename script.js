@@ -297,6 +297,7 @@ const Model = (function () {
     },
     // fetchActivitiesBySchedule(schedule) {},
     compareSchedules: compareSchedules,
+    dateFromSchedule: dateFromSchedule,
     debug: {
       setActivitiesStore: setActivitiesStore,
       getActivitiesStore: getActivitiesStore,
@@ -354,6 +355,22 @@ const ViewModel  = (argumentModel) => (function (m) {
 
     return [str, strsToMatch];
   }
+  // Activity manipulation
+  function getUserReadableActivityValue(property, value) {
+    if (["id", "name", "checked_off"].includes(property)) // properties already user-readable
+      return String(value);
+    switch (property) {
+      case "creation":
+        value = new Date(value).toDateString();
+        break;
+      case "schedule":
+        value = model.dateFromSchedule(value).toDateString();
+        break;
+      default:
+        throw new Error("unknown Activity property");
+    }
+    return value;
+  }
   // Generate State/DOMContext objects
   /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
   function createItemMappingFromContainerData(data) {
@@ -393,7 +410,7 @@ const ViewModel  = (argumentModel) => (function (m) {
         const selectedActivityProperties = [];
         let offset = idIndex; // prevent truncation of item index string
         for (const propertyName of propertyNames)
-          { selectedActivityProperties.push(activity[propertyName]) }
+          { selectedActivityProperties.push( getUserReadableActivityValue(propertyName, activity[propertyName]) ) }
         for (const activityPropertyValue of selectedActivityProperties)
           { datum[offset++] = activityPropertyValue }
       }

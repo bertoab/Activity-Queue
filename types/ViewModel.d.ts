@@ -1,3 +1,5 @@
+import { Model } from "./Model";
+
 export declare namespace ViewModel {
   /**
    * Valid values of "type" property for Container.
@@ -168,6 +170,13 @@ export declare namespace ViewModel {
      * @returns A tuple; index 0 contains "str" after the first matched string has been removed & index 1 contains an array of each matched string
      */
     function removeFirstMatchAndReturnOrderedMatches(str: string, strsToMatch: Array<string>): [string, Array<string>];
+
+    // Activity manipulation
+    /**
+     * Parse a property name and value, then return
+     * a user-readable string representation.
+     */
+    function getUserReadableActivityValue(property: keyof Model.Activity, value: Model.Activity[keyof Model.Activity]): string;
 
     // Generate State/DOMContext objects
     /**
