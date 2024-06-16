@@ -219,6 +219,12 @@ export declare namespace ViewModel {
      * @param message - The error message to be displayed
      */
     function errorState(message: string): State;
+    /**
+     * Generate a TableStateContainer based on Activity
+     * data, organized according to parameters. Applies
+     * default Container configurations.
+     */
+    function createActivitiesTableStateContainer(sort: Model.ActivitySort, filter: Model.ActivityFilter): TableStateContainer;
   }
   /**
    * Check for "Enter" keypress, then trim and split

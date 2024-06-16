@@ -454,6 +454,18 @@ const ViewModel  = (argumentModel) => (function (m) {
       }]
     };
   }
+  /** @type {import("./types").ViewModel.Private.createActivitiesTableStateContainer} */
+  function createActivitiesTableStateContainer(sort, filter) {
+    return {
+      type: "table",
+      title: "Activities",
+      data: model.getActivityIdArray(sort, filter).map( id => [id] ),
+      isLiteralData: false,
+      startingVisualIndex: "1",
+      columnNames: ["Index", "Name", "Schedule Date", "Checked Off"],
+      propertyNames: ["name", "schedule", "checked_off"]
+    };
+  }
   // Hard-coded State/DOMContext objects
   const mainMenu = {
     State: {
@@ -463,11 +475,14 @@ const ViewModel  = (argumentModel) => (function (m) {
         type: "table",
         title: undefined,
         columnNames: ["Index", "Options"],
-        data: [["Add task"], ["View history"], ["View archived"]],
+        data: [["Add task"], ["View history"], ["View archived"], ["View All Activities"]],
         functions: {
           "1": () => document.getElementById("modal-container").style.display = "flex",
           "2": () => alert("You selected: View history"),
           "3": () => alert("You selected: View archived"),
+          "4": () => updateState({
+            content: [ createActivitiesTableStateContainer() ]
+          })
         },
         isLiteralData: true,
         startingVisualIndex: "1",
