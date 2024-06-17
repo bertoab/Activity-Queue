@@ -4,6 +4,26 @@ const helperLibrary = {
     return typeof arg === 'object' &&
     !Array.isArray(arg) &&
     arg !== null
+  },
+  validateAllCharsUppercaseAlphabeticalLetters(str) {
+    const FIRST_VALID_CHAR = 65; // "A"
+    const LAST_VALID_CHAR = 90; // "Z"
+    for (let i = 0; i < str.length; i++) {
+      if (str.charCodeAt(i) < FIRST_VALID_CHAR ||
+          str.charCodeAt(i) > LAST_VALID_CHAR)
+        return false;
+    }
+    return true;
+  },
+  validateAllCharsDecimalDigits(str) {
+    const FIRST_VALID_CHAR = 48; // "0"
+    const LAST_VALID_CHAR = 57; // "9"
+    for (let i = 0; i < str.length; i++) {
+      if (str.charCodeAt(i) < FIRST_VALID_CHAR ||
+          str.charCodeAt(i) > LAST_VALID_CHAR)
+        return false;
+    }
+    return true;
   }
 };
 /** @type {import("./types").Model} */
@@ -384,14 +404,14 @@ const ViewModel  = (argumentModel) => (function (m) {
     if (typeof startingVisualIndex !== 'string')
       return data;
     data = JSON.parse(JSON.stringify(data)); // deep copy. all values must be JSON compatible!
-    if (!Number.isNaN(Number.parseInt(startingVisualIndex))) {
+    if (helperLibrary.validateAllCharsDecimalDigits(startingVisualIndex)) {
       let currentIndexPrefix = Number.parseInt(startingVisualIndex);
       for (const datum of data)
         { datum.unshift(currentIndexPrefix++); }
     }
-    const startingCharCode = startingVisualIndex.charCodeAt(0);
-    if (startingCharCode >= 65 && startingCharCode <= 90) { // uppercase alphabetical letters: "A" - "Z"
-      let currentCharCode = startingCharCode;
+    const startingChar = startingVisualIndex.charAt(0);
+    if (helperLibrary.validateAllCharsUppercaseAlphabeticalLetters(startingChar)) { // uppercase alphabetical letters: "A" - "Z"
+      let currentCharCode = startingChar.charCodeAt();
       for (const datum of data) {
         datum.unshift(String.fromCharCode(currentCharCode));
         const nextCode = currentCharCode + 1; // will behave unexpectedly where this value becomes > 90
@@ -510,9 +530,8 @@ const ViewModel  = (argumentModel) => (function (m) {
           if (inputArray[0] === "")
             inputArray.shift();
           else { // ensure remaining string of inputArray[0] contains digits (0-9)
-            for (let i = 0; i < inputArray[0].length; i++)
-              if (inputArray[0].charCodeAt(i) < 48 || inputArray[0].charCodeAt(i) > 57)
-                return updateState(errorState("Invalid Input"));
+            if (!helperLibrary.validateAllCharsDecimalDigits(inputArray[0]))
+              return updateState(errorState("Invalid Input"));
           }
           State.functionMapping[matchedFunctions[0]](...inputArray);
         } // else check for user functions not involving acronym strings and if not available, alert user of invalid user function acronym input
