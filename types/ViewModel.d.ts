@@ -170,6 +170,29 @@ export declare namespace ViewModel {
      * @returns A tuple; index 0 contains "str" after the first matched string has been removed & index 1 contains an array of each matched string
      */
     function removeFirstMatchAndReturnOrderedMatches(str: string, strsToMatch: Array<string>): [string, Array<string>];
+    /**
+     * Parse "input" to generate a Schedule object.
+     * All Schedule fields can be entered explicitly
+     * using "DDMMYYHHMM" format: day, month, year (suffix;
+     * assumes 21st century), hour (assumes 24-hour),
+     * minute. Otherwise, there are various formats to
+     * enter partial information. Only one partial format
+     * can be parsed for each call. Where a date value is
+     * absent, the current day according to system time
+     * is assumed.
+     *
+     * Dates: (no time values are assumed)
+     * - DDMM : specify day ("DD") and month ("MM"), each in 2-digit format (single digit values must be zero-padded)
+     * - XX"D" : specify number of days in the future ("XX"; up to 2 digits) from current system date; must be followed by "D" literal character
+     * - XX"N" : specify number of months in the future ("XX"; up to 2 digits) from current system date; must be followed by "N" literal character
+     * - XX"Y" : specify number of years in the future ("XX"; up to 2 digits) from current system date; must be followed by "Y" literal character
+     *
+     * Times: (all relative to current system date)
+     * - HHMM["A"|"P"] : 12-hour time format with hour ("HH") and month ("MM") each in 2-digit format; single-digit values must be zero-padded; must be followed by literal "A" (for AM) or "P" (for PM) character
+     * - XX"H" : specify number of hours in the future ("XX") from current system time
+     * - XX"M" : specify number of minutes in the future ("XX") from current system time
+     */
+    function parseDateTime(input: string): Model.Schedule;
 
     // Activity manipulation
     /**

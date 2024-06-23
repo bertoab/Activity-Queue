@@ -375,6 +375,101 @@ const ViewModel  = (argumentModel) => (function (m) {
 
     return [str, strsToMatch];
   }
+  /** @type {import("./types").ViewModel.Private.parseDateTime} */
+  function parseDateTime(input) {
+    if (input.length < 2 ||
+        (input.length > 5 && input.length !== 10))
+      throw new Error("unknown format for input string");
+    let schedule;
+    const now = new Date();
+    switch (input.length) {
+      case 10:
+        if (!helperLibrary.validateAllCharsDecimalDigits(input))
+          throw new Error("cannot parse values in input string");
+        schedule = {
+          day: Number.parseInt(input.substring(0, 2)),
+          month: Number.parseInt(input.substring(2, 4)),
+          year: Number.parseInt("20" + input.substring(4, 6)),
+          hour: Number.parseInt(input.substring(6, 8)),
+          minute: Number.parseInt(input.substring(8, 10))
+        };
+        break;
+      case 5:
+        const timeOfDayChar = input.charAt(4).toUpperCase();
+        if (!["A", "P"].includes(timeOfDayChar) ||
+            !helperLibrary.validateAllCharsDecimalDigits(input.substring(0, 4)))
+          throw new Error("cannot parse values in input string");
+        const hourOffset = timeOfDayChar === "A" ? 0 : 12;
+        let hourInput = Number.parseInt(input.substring(0, 2));
+        if (hourInput === 12)
+          hourInput = 0; // account for "hourOffset" to mitigate weird behavior for "12PM" and "12AM"
+        const calculatedHour = hourOffset + hourInput;
+        const minuteInput = Number.parseInt(input.substring(2, 4));
+        if (hourInput < 1 || hourInput > 12 ||
+            calculatedHour > 23 || minuteInput >= 60)
+          throw new Error("cannot parse values in input string");
+        schedule = {
+          day: now.getDate(),
+          month: now.getMonth() + 1,
+          year: now.getFullYear(),
+          hour: calculatedHour,
+          minute: minuteInput
+        };
+        break;
+      case 4:
+        if (!helperLibrary.validateAllCharsDecimalDigits(input))
+          throw new Error("cannot parse values in input string");
+        const dayInput = Number.parseInt(input.substring(0, 2));
+        const monthInput = Number.parseInt(input.substring(2));
+        if (dayInput < 1 || dayInput > 31 ||
+            monthInput < 1 || monthInput > 12)
+          throw new Error("cannot parse values in input string");
+        schedule = {
+          day: dayInput,
+          month: monthInput,
+          year: now.getFullYear()
+        };
+        break;
+      default: { // input.length is 3 or 2
+        const lastCharIndex = input.length - 1;
+        if (!helperLibrary.validateAllCharsDecimalDigits(input.substring(0, lastCharIndex)))
+          throw new Error("cannot parse values in input string");
+        let isTimeSpecified = false;
+        const inputNumber = Number.parseInt(input.substring(0, lastCharIndex));
+        switch (input.charAt(lastCharIndex).toUpperCase()) {
+          case "D":
+            now.setDate(now.getDate() + inputNumber);
+            break;
+          case "N":
+            now.setMonth(now.getMonth() + inputNumber);
+            break;
+          case "Y":
+            now.setFullYear(now.getFullYear() + inputNumber);
+            break;
+          case "H":
+            now.setHours(now.getHours() + inputNumber);
+            isTimeSpecified = true;
+            break;
+          case "M":
+            now.setMinutes(now.getMinutes() + inputNumber);
+            isTimeSpecified = true;
+            break;
+          default:
+            throw new Error("cannot parse values in input string");
+        }
+        schedule = {
+          day: now.getDate(),
+          month: now.getMonth() + 1,
+          year: now.getFullYear()
+        };
+        if (isTimeSpecified) {
+          schedule.hour = now.getHours();
+          schedule.minutes = now.getMinutes();
+        }
+      }
+    }
+    return schedule;
+  }
   // Activity manipulation
   function getUserReadableActivityValue(property, value) {
     if (["id", "name", "checked_off"].includes(property)) // properties already user-readable
