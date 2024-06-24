@@ -471,6 +471,7 @@ const ViewModel  = (argumentModel) => (function (m) {
     return schedule;
   }
   // Activity manipulation
+  /** @type {import("./types").ViewModel.Private.getUserReadableActivityValue} */
   function getUserReadableActivityValue(property, value) {
     if (["id", "name", "checked_off"].includes(property)) // properties already user-readable
       return String(value);
