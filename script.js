@@ -377,6 +377,8 @@ const ViewModel  = (argumentModel) => (function (m) {
   }
   /** @type {import("./types").ViewModel.Private.parseDateTime} */
   function parseDateTime(input) {
+    if (typeof input === 'undefined' || input.length === 0)
+      return;
     if (input.length < 2 ||
         (input.length > 5 && input.length !== 10))
       throw new Error("unknown format for input string");

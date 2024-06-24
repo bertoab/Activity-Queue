@@ -171,7 +171,7 @@ export declare namespace ViewModel {
      */
     function removeFirstMatchAndReturnOrderedMatches(str: string, strsToMatch: Array<string>): [string, Array<string>];
     /**
-     * Parse "input" to generate a Schedule object.
+     * Parse "input" to generate a Schedule value.
      * All Schedule fields can be entered explicitly
      * using "DDMMYYHHMM" format: day, month, year (suffix;
      * assumes 21st century), hour (assumes 24-hour),
@@ -192,7 +192,7 @@ export declare namespace ViewModel {
      * - XX"H" : specify number of hours in the future ("XX") from current system time
      * - XX"M" : specify number of minutes in the future ("XX") from current system time
      */
-    function parseDateTime(input: string): Model.Schedule;
+    function parseDateTime(input: string): Model.Schedule | undefined;
 
     // Activity manipulation
     /**
