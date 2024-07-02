@@ -59,6 +59,13 @@ export declare namespace ViewModel {
      */
     isLiteralData?: true;
     /**
+     * Synchronize "data" property with the most
+     * updated information provided by Model.
+     * Must only be defined where "isLiteralData"
+     * property is not a value of "true".
+     */
+    synchronizeData?: () => void;
+    /**
      * Define the literal index of the first item
      * in "data". Can be any integer or a single
      * alphabetical character. May also be used to
@@ -149,15 +156,19 @@ export declare namespace ViewModel {
      */
     function useItemState(itemMapping: ItemMapping): void;
     /**
-     * Conditionally overwrite the application State
-     * based on properties of "StateChangeObject";
+     * If "StateChangeObject" is "undefined", will
+     * only synchronize current StateContainers'
+     * "data" property with Model. Otherwise, if
+     * "StateChangeObject" is an object, will
+     * conditionally overwrite the application
+     * State based on properties of "StateChangeObject";
      * allowed to overwrite all State properties
      * except "itemMapping" and "functionMapping".
      * On every call, application DOMContext will
      * be regenerated and the DOM will be re-rendered.
-     * @param StateChangeObject - An object containing string keys that are application State properties and appropriate values
+     * @param StateChangeObject - Either an object containing string keys that are application State properties and appropriate values, or a value of "undefined".
      */
-    function updateState(StateChangeObject: {type: ValidContextType, title?: string, content: Array<StateContainer>}): void;
+    function updateState(StateChangeObject: {type: ValidContextType, title?: string, content: Array<StateContainer>} | undefined): void;
 
     // FunctionBar input utilities
     /**

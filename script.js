@@ -349,6 +349,11 @@ const ViewModel  = (argumentModel) => (function (m) {
         throw new TypeError("unexpected State property. Try calling useItemState and/or useItemMapping instead.");
       }
       Object.assign(State, StateChangeObject);
+    } else if (typeof StateChangeObject === 'undefined') {
+      for (const stateContainer of State.content) {
+        if (stateContainer.isLiteralData !== 'true')
+          stateContainer.synchronizeData();
+      }
     }
     // prepare and initiate render
     const stateAsDOMContext = {
@@ -579,6 +584,9 @@ const ViewModel  = (argumentModel) => (function (m) {
       title: "Activities",
       data: model.getActivityIdArray(sort, filter).map( id => [id] ),
       isLiteralData: false,
+      synchronizeData() {
+        this.data = model.getActivityIdArray(sort, filter).map( id => [id] )
+      },
       startingVisualIndex: "1",
       columnNames: ["Index", "Name", "Schedule Date", "Checked Off"],
       propertyNames: ["name", "schedule", "checked_off"]
