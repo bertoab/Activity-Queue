@@ -212,6 +212,16 @@ export declare namespace ViewModel {
      */
     function getUserReadableActivityValue(property: keyof Model.Activity, value: Model.Activity[keyof Model.Activity]): string;
 
+    // User functions
+    /**
+     * Initiate the creation of a new Activity object
+     * through means of the Model. Will have a default
+     * "checked_off" property value of "false". Induces
+     * synchronization with Model.
+     * @param nameInput - Must not be an empty string ("")
+     */
+    function addActivity(nameInput: string, dateTimeInput?: string): void;
+
     // Generate State/DOMContext objects
     /**
      * Use first and second indices of each inner

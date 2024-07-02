@@ -494,6 +494,20 @@ const ViewModel  = (argumentModel) => (function (m) {
     }
     return value;
   }
+  // User functions
+  /** @type {import("./types").ViewModel.Private.addActivity} */
+  function addActivity(nameInput, dateTimeInput) {
+    if (typeof nameInput !== 'string' || nameInput.trim() === "")
+      throw new Error("invalid user function parameter");
+    const activity = {
+      name: nameInput,
+      creation: Date.now(),
+      schedule: parseDateTime(dateTimeInput),
+      checked_off: false
+    };
+    model.newActivity(activity);
+    updateState();
+  }
   // Generate State/DOMContext objects
   /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
   function createItemMappingFromContainerData(data) {
@@ -589,7 +603,10 @@ const ViewModel  = (argumentModel) => (function (m) {
       },
       startingVisualIndex: "1",
       columnNames: ["Index", "Name", "Schedule Date", "Checked Off"],
-      propertyNames: ["name", "schedule", "checked_off"]
+      propertyNames: ["name", "schedule", "checked_off"],
+      functions: {
+        "A": addActivity
+      }
     };
   }
   // Hard-coded State/DOMContext objects
