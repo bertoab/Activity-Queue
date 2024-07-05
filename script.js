@@ -298,6 +298,7 @@ const Model = (function () {
        */
       let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id );
       // delete Activity from runtime parameters
+      uniqueIds.delete(id);
       activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
       delete idToActivityReference[id];
        // save local storage
