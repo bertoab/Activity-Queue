@@ -164,7 +164,7 @@ export declare namespace Model {
    * Use "id" to lookup and return a reference to
    * an Activity object within runtime parameters.
    */
-  function getActivity(id: string): Activity;
+  function getActivity(id: Activity["id"]): Activity;
   /**
    * Add a new Activity to local storage as well as
    * runtime parameters.
@@ -175,7 +175,7 @@ export declare namespace Model {
    * well as runtime parameters.
    * @param id - "id" property of Activity to be deleted
    */
-  function deleteActivity(id: string): void;
+  function deleteActivity(id: Activity["id"]): void;
   /**
    * Return an array of Activity "id" values using
    * the Model. The array is sorted and filtered
