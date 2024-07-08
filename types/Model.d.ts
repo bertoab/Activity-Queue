@@ -103,6 +103,13 @@ export declare namespace Model {
      * @returns length of array that Activity was added into
      */
     function insertActivityIntoScheduleTree(tree: ScheduleToActivitiesTree, activity: Activity): number;
+    /**
+     * Update the "schedule" property of an Activity, and
+     * move its relational storage location within runtime
+     * parameter, "scheduleTreeToActivityArray". Does not
+     * trigger a LocalStorage save.
+     */
+    function moveActivityLocation(activity: Activity, newSchedule: Schedule): void;
 
     // Manage Activity properties
     /**

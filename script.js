@@ -118,6 +118,20 @@ const Model = (function () {
   function insertActivityIntoScheduleTree(tree, activity) {
     return findSpecificActivityArrayInScheduleTree(tree, activity.schedule, true).push(activity);
   }
+  /** @type {import("./types").Model.Private.moveActivityLocation} */
+  function moveActivityLocation(activity, newSchedule) {
+    // find Activity's current array index
+    let activityArrayInScheduleTree = findSpecificActivityArrayInScheduleTree(scheduleTreeToActivityArray, activity.schedule);
+    /**
+     * worst case time complexity of next interpreted line: O(m),
+     * where m is the total number of Activities in the corresponding
+     * Activity array within "scheduleTreeToActivityArray"
+     */
+    let activityIndex = activityArrayInScheduleTree.findIndex( searchActivity => searchActivity.id === activity.id );
+    activityArrayInScheduleTree.splice(activityIndex, 1); // worst case time complexity: O(m)
+    activity.schedule = newSchedule;
+    insertActivityIntoScheduleTree(scheduleTreeToActivityArray, activity);
+  }
   // Manage Activity properties
   /** @type {import("./types").Model.Private.findScheduleDepth} */
   function findScheduleDepth(schedule) {
