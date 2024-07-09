@@ -535,6 +535,18 @@ const ViewModel  = (argumentModel) => (function (m) {
     model.newActivity(activity);
     updateState();
   }
+  /** @type {import("./types").ViewModel.Private.toggleActivityCheckedOff} */
+  function toggleActivityCheckedOff(itemInput) {
+    const id = State.itemMapping[itemInput];
+    const currentCheckedOffValue = model.getActivity(id)["checked_off"];
+    let newCheckedOffValue;
+    if (typeof currentCheckedOffValue === 'undefined')
+      newCheckedOffValue = true;
+    else
+      newCheckedOffValue = !currentCheckedOffValue;
+    model.updateActivity({ checked_off: newCheckedOffValue }, id);
+    updateState();
+  }
   // Generate State/DOMContext objects
   /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
   function createItemMappingFromContainerData(data) {
@@ -632,7 +644,8 @@ const ViewModel  = (argumentModel) => (function (m) {
       columnNames: ["Index", "Name", "Schedule Date", "Checked Off"],
       propertyNames: ["name", "schedule", "checked_off"],
       functions: {
-        "A": addActivity
+        "A": addActivity,
+        "T": toggleActivityCheckedOff
       }
     };
   }

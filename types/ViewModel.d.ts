@@ -221,6 +221,15 @@ export declare namespace ViewModel {
      * @param nameInput - Must not be an empty string ("")
      */
     function addActivity(nameInput: string, dateTimeInput?: string): void;
+    /**
+     * Toggle the "checked_off" property of an Activity.
+     * The Activity must have a reference (its "id"
+     * property) within "State.itemMapping". If the
+     * value of the current "checked_off" property is
+     * "undefined", a default value of "true" will be
+     * applied.
+     */
+    function toggleActivityCheckedOff(itemInput: string): void;
 
     // Generate State/DOMContext objects
     /**
