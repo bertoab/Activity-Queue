@@ -38,6 +38,14 @@ export declare namespace Model {
     schedule?: Schedule;
   }
   /**
+   * An object used to describe changes to an existing
+   * Activity. All properties are optional.
+   */
+  interface ActivityDiff extends Activity {
+   id?: Activity["id"];
+   creation?: Activity["creation"];
+  }
+  /**
    * Object describing properties and values
    * used to filter Array<Activity>
    */
@@ -177,6 +185,11 @@ export declare namespace Model {
    * runtime parameters.
    */
   function newActivity(activity: Activity): void;
+  /**
+   * Update an existing Activity within local storage
+   * as well as runtime parameters.
+   */
+  function updateActivity(id: Activity["id"], diff: ActivityDiff): void;
   /**
    * Delete an Activity object from local storage as
    * well as runtime parameters.

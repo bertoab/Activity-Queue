@@ -293,7 +293,19 @@ const Model = (function () {
       // save local storage
       setActivitiesStore(scheduleTreeToActivityArray);
     },
-    // updateActivity(activity, priorSchedule) {},
+    updateActivity(diff, id) {
+      //TODO: more "diff" validation
+      if (!helperLibrary.isObject(diff))
+        throw new TypeError(`"diff" is not an object`);
+      const activity = idToActivityReference[id];
+      if (helperLibrary.isObject(diff.schedule)) {
+        moveActivityLocation(activity, diff.schedule);
+        delete diff.schedule;
+      }
+      Object.assign(activity, diff); // ...properties that can be updated in-place
+      // save local storage
+      setActivitiesStore(scheduleTreeToActivityArray);
+    },
     deleteActivity(id) {
       // find Activity object in ScheduleToActivitiesTree
       let allActivitiesArray = flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray);
