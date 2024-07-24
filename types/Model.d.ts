@@ -176,6 +176,16 @@ export declare namespace Model {
     function loadActivityIdsFromArray(activityArray: Array<Activity>): void;
   }
   /**
+   * Set string key to be used for fetching Activity
+   * data structures from LocalStorage API.
+   */
+  function setActivitiesStorageKey(newKey: string): void;
+  /**
+   * Get string key used for fetching Activity data
+   * structures from LocalStorage API.
+   */
+  function getActivitiesStorageKey(): string;
+  /**
    * Use "id" to lookup and return a reference to
    * an Activity object within runtime parameters.
    */

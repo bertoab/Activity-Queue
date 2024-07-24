@@ -28,20 +28,20 @@ const helperLibrary = {
 };
 /** @type {import("./types").Model} */
 const Model = (function () {
-  // Constants
-  const ACTIVITIES_STORAGE_KEY = "activities";
+  // Storage Keys
+  let activities_storage_key = "activities";
   // Manage local storage
   /** @type {import("./types").Model.Private.setActivitiesStore} */
   const setActivitiesStore = (scheduleTree) => {
     if (!helperLibrary.isObject(scheduleTree)) {
-      localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify({}));
+      localStorage.setItem(activities_storage_key, JSON.stringify({}));
       return;
     }
-    localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(scheduleTree));
+    localStorage.setItem(activities_storage_key, JSON.stringify(scheduleTree));
   }
   /** @type {import("./types").Model.Private.getActivitiesStore} */
   const getActivitiesStore = () => {
-    let loadedData = JSON.parse(localStorage.getItem(ACTIVITIES_STORAGE_KEY));
+    let loadedData = JSON.parse(localStorage.getItem(activities_storage_key));
     if (loadedData === null) // uninitialized local storage
       return {};
     else if (!helperLibrary.isObject(loadedData))
@@ -282,6 +282,14 @@ const Model = (function () {
   //...groupIdToActivityIdArray = ...
 
   return {
+    setActivitiesStorageKey(newKey) {
+      if (typeof newKey !== 'string')
+        throw new TypeError(`"newKey" is not a string`);
+      activities_storage_key = newKey;
+    },
+    getActivitiesStorageKey() {
+      return activities_storage_key;
+    },
     getActivity(id) {
       return idToActivityReference[id];
     },
@@ -348,7 +356,7 @@ const Model = (function () {
     debug: {
       setActivitiesStore: setActivitiesStore,
       getActivitiesStore: getActivitiesStore,
-      ACTIVITIES_STORAGE_KEY: ACTIVITIES_STORAGE_KEY
+      ACTIVITIES_STORAGE_KEY: activities_storage_key
     }
   };
 })();
