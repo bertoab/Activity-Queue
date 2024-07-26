@@ -174,6 +174,15 @@ export declare namespace Model {
      * reference to runtime parameters.
      */
     function loadActivityIdsFromArray(activityArray: Array<Activity>): void;
+    /**
+     * Read LocalStorage to populate data for
+     * runtime parameters.
+     */
+    function initializeRuntimeParameters(): void;
+    /**
+     * Delete all cached runtime parameter data.
+     */
+    function clearRuntimeParameters(): void;
   }
   /**
    * Set string key to be used for fetching Activity

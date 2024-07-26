@@ -273,10 +273,20 @@ const Model = (function () {
    * of both data structures.
    */
   let groupIdToActivityIdArray;
+  /** @type {import("./types").Model.Private.initializeRuntimeParameters} */
+  function initializeRuntimeParameters() {
+    // load Activity data
+    scheduleTreeToActivityArray = getActivitiesStore();
+    loadActivityIdsFromArray(flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray));
+  }
+  /** @type {import("./types").Model.Private.clearRuntimeParameters} */
+  function clearRuntimeParameters() {
+    uniqueIds.clear();
+    idToActivityReference = {};
+    scheduleTreeToActivityArray = undefined;
+  }
 
-  // load Activity data
-  scheduleTreeToActivityArray = getActivitiesStore();
-  loadActivityIdsFromArray(flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray));
+  initializeRuntimeParameters();
 
   //...idToGroupReference = Object.fromEntries(...));
   //...groupIdToActivityIdArray = ...
@@ -286,6 +296,8 @@ const Model = (function () {
       if (typeof newKey !== 'string')
         throw new TypeError(`"newKey" is not a string`);
       activities_storage_key = newKey;
+      clearRuntimeParameters();
+      initializeRuntimeParameters();
     },
     getActivitiesStorageKey() {
       return activities_storage_key;
