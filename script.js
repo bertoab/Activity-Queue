@@ -569,6 +569,12 @@ const ViewModel  = (argumentModel) => (function (m) {
     model.newActivity(activity);
     updateState();
   }
+  /** @type {import("./types").ViewModel.Private.removeActivity} */
+  function removeActivity(itemInput) {
+    const id = State.itemMapping[itemInput];
+    model.deleteActivity(id);
+    updateState();
+  }
   /** @type {import("./types").ViewModel.Private.toggleActivityCheckedOff} */
   function toggleActivityCheckedOff(itemInput) {
     const id = State.itemMapping[itemInput];
@@ -680,7 +686,8 @@ const ViewModel  = (argumentModel) => (function (m) {
       functions: {
         "A": addActivity,
         "T": toggleActivityCheckedOff,
-        "CHENV": toggleActivitiesStorageEnvironment
+        "CHENV": toggleActivitiesStorageEnvironment,
+        "D": removeActivity
       }
     };
   }

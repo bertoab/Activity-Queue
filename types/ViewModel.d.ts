@@ -228,6 +228,13 @@ export declare namespace ViewModel {
      */
     function addActivity(nameInput: string, dateTimeInput?: string): void;
     /**
+     * Remove an Activity object from both runtime
+     * parameters as well as LocalStorage. Induce
+     * synchronization with Model.
+     * @param itemInput - A visual item index to a valid Activity within State.itemMapping
+     */
+    function removeActivity(itemInput: string): void;
+    /**
      * Toggle the "checked_off" property of an Activity.
      * The Activity must have a reference (its "id"
      * property) within "State.itemMapping". If the
