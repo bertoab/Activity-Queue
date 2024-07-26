@@ -214,6 +214,12 @@ export declare namespace ViewModel {
 
     // User functions
     /**
+     * Toggle the storage key used for LocalStorage
+     * Activity data between default and development
+     * values. Induces a reset of Model's runtime parameters.
+     */
+    function toggleActivitiesStorageEnvironment(): void;
+    /**
      * Initiate the creation of a new Activity object
      * through means of the Model. Will have a default
      * "checked_off" property value of "false". Induces

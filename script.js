@@ -542,6 +542,20 @@ const ViewModel  = (argumentModel) => (function (m) {
     return value;
   }
   // User functions
+  /** @type {import("./types").ViewModel.Private.toggleActivitiesStorageEnvironment} */
+  function toggleActivitiesStorageEnvironment() {
+    const validKeys = ["activities", "development"];
+    const currentKey = model.getActivitiesStorageKey();
+    if (!validKeys.includes(currentKey))
+      throw new Error(`unexpected local storage key for Activities: ${currentKey}`);
+    let newKey;
+    if (currentKey === "activities")
+      newKey = "development";
+    else
+      newKey = "activities";
+    model.setActivitiesStorageKey(newKey);
+    updateState();
+  }
   /** @type {import("./types").ViewModel.Private.addActivity} */
   function addActivity(nameInput, dateTimeInput) {
     if (typeof nameInput !== 'string' || nameInput.trim() === "")
@@ -665,7 +679,8 @@ const ViewModel  = (argumentModel) => (function (m) {
       propertyNames: ["name", "schedule", "checked_off"],
       functions: {
         "A": addActivity,
-        "T": toggleActivityCheckedOff
+        "T": toggleActivityCheckedOff,
+        "CHENV": toggleActivitiesStorageEnvironment
       }
     };
   }
