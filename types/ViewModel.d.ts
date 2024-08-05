@@ -244,6 +244,24 @@ export declare namespace ViewModel {
      */
     function toggleActivityCheckedOff(itemInput: string): void;
 
+    // User functions (bound to StateContainer)
+    /**
+     * These user functions operate directly on
+     * the properties of a StateContainer object.
+     * Therefore, "this" must be bound for expected
+     * results.
+     */
+    /**
+     * Attempt to update pagination properties
+     * of "this" to the next page.
+     */
+    function nextPage(this: StateContainer): void;
+    /**
+     * Attempt to update pagination properties
+     * of "this" to the previous page.
+     */
+    function prevPage(this: StateContainer): void;
+
     // Generate State/DOMContext objects
     /**
      * Use first and second indices of each inner
@@ -252,6 +270,12 @@ export declare namespace ViewModel {
      * association for an ItemMapping.
      */
     function createItemMappingFromContainerData(data: Container["data"]): ItemMapping;
+    /**
+     * Return a shallow-copy, subset array of "data"
+     * and set user-facing pagination properties on
+     * "DOMContainer".
+     */
+    function configureContainerPagination(DOMContainer: DOMContainer, data: StateContainer["data"], currentPageIndex: StateContainer["currentPageIndex"], maxPageItems: StateContainer["maxPageItems"]): DOMContainer["data"];
     /**
      * Generate a deep copy of "data" using JSON
      * API (all "data" values must be JSON

@@ -587,6 +587,38 @@ const ViewModel  = (argumentModel) => (function (m) {
     model.updateActivity({ checked_off: newCheckedOffValue }, id);
     updateState();
   }
+  // User functions (bound to StateContainer)
+  /** @type {import("./types").ViewModel.Private.nextPage} */
+  function nextPage() {
+    if (typeof this.maxPageItems === 'undefined')
+      //TODO: display a message saying "You are on the last page"
+      return;
+    let maxPageIndex;
+    if (this.data.length % this.maxPageItems === 0)
+      maxPageIndex = (this.data.length / this.maxPageItems) - 1;
+    else
+      maxPageIndex = Math.floor(this.data.length / this.maxPageItems);
+    let nextPageIndex;
+    if (typeof this.currentPageIndex === 'number')
+      nextPageIndex = this.currentPageIndex + 1;
+    else
+      nextPageIndex = 1;
+    if (nextPageIndex > maxPageIndex)
+      //TODO: display a message saying "You are on the last page"
+      return;
+    this.currentPageIndex = nextPageIndex;
+    updateState();
+  }
+  /** @type {import("./types").ViewModel.Private.prevPage} */
+  function prevPage() {
+    if (typeof this.currentPageIndex === 'undefined'
+        || this.currentPageIndex === 0
+        || typeof this.maxPageItems === 'undefined')
+      //TODO: display a message saying "You are on the first page"
+      return;
+    this.currentPageIndex--;
+    updateState();
+  }
   // Generate State/DOMContext objects
   /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
   function createItemMappingFromContainerData(data) {
@@ -594,6 +626,35 @@ const ViewModel  = (argumentModel) => (function (m) {
     for (const datum of data)
     { mapping[datum[0]] = datum[1] }
     return mapping;
+  }
+  /** @type {import("./types").ViewModel.Private.configureContainerPagination} */
+  function configureContainerPagination(DOMContainer, data, currentPageIndex, maxPageItems) {
+    // validate params...
+    if (typeof currentPageIndex === 'undefined') {
+      currentPageIndex = 0;
+    }
+    if (currentPageIndex > 0) {
+      if (typeof maxPageItems === 'undefined')
+        throw new RangeError(`cannot select page with index ${currentPageIndex}; "maxPageItems" is undefined`);
+    } else if (currentPageIndex < 0) {
+      throw new RangeError(`cannot select page with negative index: ${currentPageIndex}`);
+    } else {
+      if (typeof maxPageItems === 'undefined')
+        maxPageItems = data.length;
+    }
+    // calculate and slice selected portion of "data"
+    let maxPageIndex;
+    if (data.length % maxPageItems === 0)
+      maxPageIndex = (data.length / maxPageItems) - 1;
+    else
+      maxPageIndex = Math.floor(data.length / maxPageItems);
+    if (currentPageIndex > maxPageIndex)
+      throw new RangeError(`cannot select page with index ${currentPageIndex}; calculated maximum is ${maxPageIndex}`);
+    const firstItemIndex = maxPageItems * currentPageIndex;
+    // set DOMContainer props
+    DOMContainer.currentPageNumber = String(currentPageIndex + 1);
+    DOMContainer.lastPageNumber = String(maxPageIndex + 1);
+    return data.slice(firstItemIndex, firstItemIndex + maxPageItems);
   }
   /** @type {import("./types").ViewModel.Private.generateContainerDataIndices} */
   function generateContainerDataIndices(data, startingVisualIndex) {
@@ -640,7 +701,8 @@ const ViewModel  = (argumentModel) => (function (m) {
       title: stateContainer.title,
     };
     useFunctionState(stateContainer.functions); // side effect
-    DOMContainer.data = generateContainerDataIndices(stateContainer.data, stateContainer.startingVisualIndex);
+    DOMContainer.data = configureContainerPagination(DOMContainer, stateContainer.data, stateContainer.currentPageIndex, stateContainer.maxPageItems);
+    DOMContainer.data = generateContainerDataIndices(DOMContainer.data, stateContainer.startingVisualIndex);
     if (typeof stateContainer.startingVisualIndex === 'string')
       useItemState(createItemMappingFromContainerData(DOMContainer.data)); // side effect
     switch (DOMContainer.type) {
@@ -672,7 +734,7 @@ const ViewModel  = (argumentModel) => (function (m) {
   }
   /** @type {import("./types").ViewModel.Private.createActivitiesTableStateContainer} */
   function createActivitiesTableStateContainer(sort, filter) {
-    return {
+    const stateContainer = {
       type: "table",
       title: "Activities",
       data: model.getActivityIdArray(sort, filter).map( id => [id] ),
@@ -680,16 +742,21 @@ const ViewModel  = (argumentModel) => (function (m) {
       synchronizeData() {
         this.data = model.getActivityIdArray(sort, filter).map( id => [id] )
       },
+      currentPageIndex: 0,
+      maxPageItems: 15,
       startingVisualIndex: "1",
       columnNames: ["Index", "Name", "Schedule Date", "Checked Off"],
       propertyNames: ["name", "schedule", "checked_off"],
-      functions: {
-        "A": addActivity,
-        "T": toggleActivityCheckedOff,
-        "CHENV": toggleActivitiesStorageEnvironment,
-        "D": removeActivity
-      }
     };
+    stateContainer.functions = {
+      "N": nextPage.bind(stateContainer),
+      "P": prevPage.bind(stateContainer),
+      "A": addActivity,
+      "T": toggleActivityCheckedOff,
+      "CHENV": toggleActivitiesStorageEnvironment,
+      "D": removeActivity
+    };
+    return stateContainer;
   }
   // Hard-coded State/DOMContext objects
   const mainMenu = {
