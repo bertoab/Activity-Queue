@@ -902,11 +902,17 @@ const View = (argumentViewModel) => (function (vm) {
   function createContentDiv(content) {
     //TODO: iterate "content" to support multiple containers in one DOMContext
     const container = content[0];
-    if (container.type === "table")
-      return createTableContainer(container.columnNames, container.data, container.title);
-    if (container.type === "parameters")
-      return createParametersContainer(container.data);
-    throw new TypeError("unexpected parameter type");
+    let containerDOMElement;
+    if (container.type === "table") {
+      containerDOMElement = createTableContainer(container.columnNames, container.data, container.title);
+    } else if (container.type === "parameters") {
+      containerDOMElement = createParametersContainer(container.data);
+    } else {
+      throw new TypeError("unexpected parameter type");
+    }
+    if (typeof container.currentPageNumber === 'string' && typeof container.lastPageNumber === 'string')
+      containerDOMElement.appendChild(createPaginationInfo(container.currentPageNumber, container.lastPageNumber));
+    return containerDOMElement;
   }
   /** @type {import("./types").View.Private.createPaginationInfo} */
   function createFunctionBarAndAttachKeyPressHandler() {
