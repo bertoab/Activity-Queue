@@ -644,7 +644,9 @@ const ViewModel  = (argumentModel) => (function (m) {
     }
     // calculate and slice selected portion of "data"
     let maxPageIndex;
-    if (data.length % maxPageItems === 0)
+    if (data.length === 0)
+      maxPageIndex = 0;
+    else if (data.length % maxPageItems === 0)
       maxPageIndex = (data.length / maxPageItems) - 1;
     else
       maxPageIndex = Math.floor(data.length / maxPageItems);
