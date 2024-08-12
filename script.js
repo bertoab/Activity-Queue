@@ -350,14 +350,20 @@ const Model = (function () {
        // save local storage
       setActivitiesStore(scheduleTreeToActivityArray);
     },
-    getActivityIdArray(sort, filter) {
+    getActivityIdArray(scope) {
       let activities = flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray);
-      if (!helperLibrary.isObject(sort) || sort.scheduleAscending !== true)
+      if (typeof scope === 'undefined') {
         activities = activities.sort( (a, b) => compareSchedules(b.schedule, a.schedule) );
-      else
-        activities = activities.sort( (a, b) => compareSchedules(a.schedule, b.schedule) );
-      if (helperLibrary.isObject(filter) && typeof filter.checked_off === 'boolean') {
-        activities = activities.filter( activity => activity.checked_off === filter.checked_off );
+      } else if (helperLibrary.isObject(scope)) {
+        if (!helperLibrary.isObject(scope.sort) || scope.sort.scheduleAscending !== true)
+          activities = activities.sort( (a, b) => compareSchedules(b.schedule, a.schedule) );
+        else
+          activities = activities.sort( (a, b) => compareSchedules(a.schedule, b.schedule) );
+        if (helperLibrary.isObject(scope.filter) && typeof scope.filter.checked_off === 'boolean') {
+          activities = activities.filter( activity => activity.checked_off === scope.filter.checked_off );
+        }
+      } else {
+        throw new TypeError(`"scope" is not an object or undefined`);
       }
       //TODO: implement more filter options
       return activities.map( activity => activity.id );
@@ -735,14 +741,15 @@ const ViewModel  = (argumentModel) => (function (m) {
     };
   }
   /** @type {import("./types").ViewModel.Private.createActivitiesTableStateContainer} */
-  function createActivitiesTableStateContainer(sort, filter) {
+  function createActivitiesTableStateContainer(initialScope) {
     const stateContainer = {
       type: "table",
       title: "Activities",
-      data: model.getActivityIdArray(sort, filter).map( id => [id] ),
+      data: model.getActivityIdArray(initialScope).map( id => [id] ),
       isLiteralData: false,
+      dataScope: initialScope,
       synchronizeData() {
-        this.data = model.getActivityIdArray(sort, filter).map( id => [id] )
+        this.data = model.getActivityIdArray(this.dataScope).map( id => [id] )
       },
       currentPageIndex: 0,
       maxPageItems: 15,

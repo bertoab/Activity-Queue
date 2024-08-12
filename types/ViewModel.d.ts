@@ -59,6 +59,11 @@ export declare namespace ViewModel {
      */
     isLiteralData?: true;
     /**
+     * Used to describe non-literal data to be
+     * fetched from the Model.
+     */
+    dataScope?: Model.ActivityScope;
+    /**
      * Synchronize "data" property with the most
      * updated information provided by Model.
      * Must only be defined where "isLiteralData"
@@ -311,10 +316,10 @@ export declare namespace ViewModel {
     function errorState(message: string): State;
     /**
      * Generate a TableStateContainer based on Activity
-     * data, organized according to parameters. Applies
-     * default Container configurations.
+     * data, organized according to "initialScope".
+     * Applies default Container configurations.
      */
-    function createActivitiesTableStateContainer(sort: Model.ActivitySort, filter: Model.ActivityFilter): TableStateContainer;
+    function createActivitiesTableStateContainer(initialScope?: Model.ActivityScope): TableStateContainer;
   }
   /**
    * Check for "Enter" keypress, then trim and split

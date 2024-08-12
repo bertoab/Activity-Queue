@@ -65,6 +65,10 @@ export declare namespace Model {
      */
     scheduleAscending?: true;
   }
+  interface ActivityScope {
+   sort: ActivitySort;
+   filter: ActivityFilter;
+  }
   namespace Private {
     // Manage local storage
     /**
@@ -218,7 +222,7 @@ export declare namespace Model {
   /**
    * Return an array of Activity "id" values using
    * the Model. The array is sorted and filtered
-   * according to parameters.
+   * according to "scope".
    */
-  function getActivityIdArray(sort?: ActivitySort, filter?: ActivityFilter): Array<Activity.id>;
+  function getActivityIdArray(scope?: ActivityScope): Array<Activity.id>;
 }
