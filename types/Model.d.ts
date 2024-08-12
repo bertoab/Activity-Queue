@@ -46,11 +46,27 @@ export declare namespace Model {
    creation?: Activity["creation"];
   }
   /**
+   * For Activity properties that can be compared
+   * in a quantitative manner, like numbers.
+   */
+  interface ActivityNumberLikeFilter {
+    before?: number;
+    after?: number;
+    includeMatch?: true;
+  }
+  type ActivityCreationFilter = ActivityNumberLikeFilter;
+  interface ActivityScheduleFilter extends ActivityNumberLikeFilter {
+    before?: Schedule;
+    after?: Schedule;
+  }
+  /**
    * Object describing properties and values
    * used to filter Array<Activity>
    */
   interface ActivityFilter {
     checked_off?: boolean;
+    schedule?: ActivityScheduleFilter;
+    creation?: ActivityCreationFilter;
   }
   /**
    * Object describing properties and values
@@ -145,6 +161,14 @@ export declare namespace Model {
     function dateFromSchedule(schedule: Schedule): Date;
 
     // Manage Array<Activity> structure
+    /**
+     * Return an array of Activities that meet
+     * all the criteria specified in "filter".
+     * If "filter" is not an object, "arr" is
+     * returned, without any processing.
+     * @param compareFn - must return a number less than 0 if the first argument is numerically lesser than the second argument; otherwise, if the second is greater than the first, it should return a number greater than 0; otherwise, it should return 0 (both arguments calculated as equivalent)
+     */
+    function applyActivityNumberLikeFilter(arr: Array<Activity>, targetProperty: string, filter?: ActivityNumberLikeFilter, compareFn?: Function): Array<Activity>;
     /**
      * Filter "activityArray" and return a new array
      * of the Activities passing the filter criteria.

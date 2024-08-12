@@ -174,6 +174,39 @@ const Model = (function () {
     return new Date(...params);
   }
   // Manage Array<Activity> structure
+  /** @type {import("./types").Model.Private.applyActivityNumberLikeFilter} */
+  function applyActivityNumberLikeFilter(arr, targetProperty, filter, compareFn) {
+    if (!helperLibrary.isObject(filter))
+      return arr;
+    if (typeof compareFn !== 'function')
+      compareFn = (a, b) => a - b;
+    const satisfiesBeforeFilterCondition = (testValue) => {
+      const comparisonResult = compareFn(testValue, filter.before);
+      if (comparisonResult < 0 || (comparisonResult === 0 && filter.includeMatch === true))
+        return true;
+      else
+        return false;
+    }
+    const satisfiesAfterFilterCondition = (testValue) => {
+      const comparisonResult = compareFn(testValue, filter.after);
+      if (comparisonResult > 0 || (comparisonResult === 0 && filter.includeMatch === true))
+        return true;
+      else
+        return false;
+    }
+    // loop to filter Activities
+    const filteredArr = [];
+    for (const activity of arr) {
+      let failedBeforeCondition = false, failedAfterCondition = false;
+      if (typeof filter.before !== 'undefined' && (!satisfiesBeforeFilterCondition(activity[targetProperty])))
+        failedBeforeCondition = true;
+      if (typeof filter.after !== 'undefined' && (!satisfiesAfterFilterCondition(activity[targetProperty])))
+        failedAfterCondition = true;
+      if (!failedBeforeCondition && !failedAfterCondition)
+        filteredArr.push(activity);
+    }
+    return filteredArr;
+  }
   /** @type {import("./types").Model.Private.filterActivityArray} */
   function filterActivityArray(activityArray, filter, testForInequality) {
     let filterTest; // configured to return "true" if an Activity's property passes the filter
@@ -355,17 +388,23 @@ const Model = (function () {
       if (typeof scope === 'undefined') {
         activities = activities.sort( (a, b) => compareSchedules(b.schedule, a.schedule) );
       } else if (helperLibrary.isObject(scope)) {
+        // sorting
         if (!helperLibrary.isObject(scope.sort) || scope.sort.scheduleAscending !== true)
           activities = activities.sort( (a, b) => compareSchedules(b.schedule, a.schedule) );
         else
           activities = activities.sort( (a, b) => compareSchedules(a.schedule, b.schedule) );
-        if (helperLibrary.isObject(scope.filter) && typeof scope.filter.checked_off === 'boolean') {
-          activities = activities.filter( activity => activity.checked_off === scope.filter.checked_off );
+        // filtering
+        if (helperLibrary.isObject(scope.filter)) {
+          if (typeof scope.filter.checked_off === 'boolean')
+            activities = activities.filter( activity => activity.checked_off === scope.filter.checked_off );
+          if (helperLibrary.isObject(scope.filter.creation))
+            activities = applyActivityNumberLikeFilter(activities, "creation", scope.filter.creation);
+          if (helperLibrary.isObject(scope.filter.schedule))
+            activities = applyActivityNumberLikeFilter(activities, "schedule", scope.filter.schedule, compareSchedules);
         }
       } else {
         throw new TypeError(`"scope" is not an object or undefined`);
       }
-      //TODO: implement more filter options
       return activities.map( activity => activity.id );
     },
     // fetchActivitiesBySchedule(schedule) {},
