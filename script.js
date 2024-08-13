@@ -346,7 +346,7 @@ const Model = (function () {
       // save local storage
       setActivitiesStore(scheduleTreeToActivityArray);
     },
-    updateActivity(diff, id) {
+    updateActivity(id, diff) {
       //TODO: more "diff" validation
       if (!helperLibrary.isObject(diff))
         throw new TypeError(`"diff" is not an object`);
@@ -629,7 +629,7 @@ const ViewModel  = (argumentModel) => (function (m) {
       newCheckedOffValue = true;
     else
       newCheckedOffValue = !currentCheckedOffValue;
-    model.updateActivity({ checked_off: newCheckedOffValue }, id);
+    model.updateActivity(id, { checked_off: newCheckedOffValue });
     updateState();
   }
   // User functions (bound to StateContainer)
