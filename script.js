@@ -359,6 +359,15 @@ const Model = (function () {
       // save local storage
       setActivitiesStore(scheduleTreeToActivityArray);
     },
+    duplicateActivity(id, diff) {
+      const orig = this.getActivity(id);
+      const copy = JSON.parse(JSON.stringify(orig)); // deep copy
+      delete copy.id;
+      this.newActivity(copy);
+      if (helperLibrary.isObject(diff))
+        this.updateActivity(copy.id, diff);
+      return copy.id;
+    },
     deleteActivity(id) {
       // find Activity object in ScheduleToActivitiesTree
       let allActivitiesArray = flattenScheduleTreeToActivitiesArray(scheduleTreeToActivityArray);

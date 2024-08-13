@@ -238,6 +238,13 @@ export declare namespace Model {
    */
   function updateActivity(id: Activity["id"], diff: ActivityDiff): void;
   /**
+   * Duplicate an existing Activity within local storage
+   * as well as runtime parameters. Optionally, change
+   * properties of duplicated Activity upon creation.
+   * @returns the id of the newly created Activity
+   */
+  function duplicateActivity(id: Activity["id"], diff?: ActivityDiff): Activity["id"];
+  /**
    * Delete an Activity object from local storage as
    * well as runtime parameters.
    * @param id - "id" property of Activity to be deleted
