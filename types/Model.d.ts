@@ -36,6 +36,12 @@ export declare namespace Model {
     name?: string;
     checked_off?: boolean;
     schedule?: Schedule;
+    /**
+     * If defined, an "id" property of another
+     * Activity or a Group that induced the
+     * the creation of this one.
+     */
+    origin?: string;
   }
   /**
    * An object used to describe changes to an existing

@@ -641,6 +641,18 @@ const ViewModel  = (argumentModel) => (function (m) {
     model.updateActivity(id, { checked_off: newCheckedOffValue });
     updateState();
   }
+  /** @type {import("./types").ViewModel.Private.copyActivityIntoToday} */
+  function copyActivityIntoToday(itemInput) {
+    const id = State.itemMapping[itemInput];
+    const now = new Date();
+    const todaySchedule = {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+      day: now.getDate()
+    };
+    model.duplicateActivity(id, { schedule: todaySchedule, origin: id });
+    updateState();
+  }
   // User functions (bound to StateContainer)
   /** @type {import("./types").ViewModel.Private.nextPage} */
   function nextPage() {
@@ -811,7 +823,8 @@ const ViewModel  = (argumentModel) => (function (m) {
       "A": addActivity,
       "T": toggleActivityCheckedOff,
       "CHENV": toggleActivitiesStorageEnvironment,
-      "D": removeActivity
+      "D": removeActivity,
+      "C": copyActivityIntoToday
     };
     return stateContainer;
   }
