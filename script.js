@@ -697,6 +697,12 @@ const ViewModel  = (argumentModel) => (function (m) {
     this.currentPageIndex--;
     updateState();
   }
+  /** @type {import("./types").ViewModel.Private.resetScopeFilterSchedule} */
+  function resetScopeFilterSchedule() {
+    assertValidScope.call(this);
+    this.dataScope.filter.schedule = {};
+    updateState();
+  }
   // Generate State/DOMContext objects
   /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
   function createItemMappingFromContainerData(data) {
@@ -832,6 +838,7 @@ const ViewModel  = (argumentModel) => (function (m) {
     stateContainer.functions = {
       "N": nextPage.bind(stateContainer),
       "P": prevPage.bind(stateContainer),
+      "RS": resetScopeFilterSchedule.bind(stateContainer),
       "A": addActivity,
       "T": toggleActivityCheckedOff,
       "CHENV": toggleActivitiesStorageEnvironment,

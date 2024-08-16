@@ -280,6 +280,11 @@ export declare namespace ViewModel {
      * of "this" to the previous page.
      */
     function prevPage(this: StateContainer): void;
+    /**
+     * Reset the "dataScope.filter.schedule" property
+     * of the bound StateContainer.
+     */
+    function resetScopeFilterSchedule(this: StateContainer): void;
 
     // Generate State/DOMContext objects
     /**
