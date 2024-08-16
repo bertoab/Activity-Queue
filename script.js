@@ -703,6 +703,14 @@ const ViewModel  = (argumentModel) => (function (m) {
     this.dataScope.filter.schedule = {};
     updateState();
   }
+  /** @type {import("./types").ViewModel.Private.setScopeFilterScheduleBefore} */
+  function setScopeFilterScheduleBefore(scheduleInput) {
+    if (typeof scheduleInput !== 'string')
+      throw new TypeError(`"scheduleInput" is not a string`);
+    assertValidScope.call(this);
+    this.dataScope.filter.schedule.before = parseDateTime(scheduleInput);
+    updateState();
+  }
   // Generate State/DOMContext objects
   /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
   function createItemMappingFromContainerData(data) {
@@ -839,6 +847,7 @@ const ViewModel  = (argumentModel) => (function (m) {
       "N": nextPage.bind(stateContainer),
       "P": prevPage.bind(stateContainer),
       "RS": resetScopeFilterSchedule.bind(stateContainer),
+      "FB": setScopeFilterScheduleBefore.bind(stateContainer),
       "A": addActivity,
       "T": toggleActivityCheckedOff,
       "CHENV": toggleActivitiesStorageEnvironment,

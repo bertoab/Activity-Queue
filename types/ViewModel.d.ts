@@ -285,6 +285,13 @@ export declare namespace ViewModel {
      * of the bound StateContainer.
      */
     function resetScopeFilterSchedule(this: StateContainer): void;
+    /**
+     * Parse a "schedule" value to set the
+     * "dataScope.filter.schedule.before" property
+     * of the bound StateContainer. Depends on
+     * "assertValidScope" user fn.
+     */
+    function setScopeFilterScheduleBefore(this: StateContainer, scheduleInput: string): void;
 
     // Generate State/DOMContext objects
     /**
