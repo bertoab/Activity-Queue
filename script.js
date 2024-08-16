@@ -654,6 +654,18 @@ const ViewModel  = (argumentModel) => (function (m) {
     updateState();
   }
   // User functions (bound to StateContainer)
+  /** @type {import("./types").ViewModel.Private.assertValidScope} */
+  function assertValidScope() {
+    if (!helperLibrary.isObject(this.dataScope))
+      this.dataScope = {};
+    if (!helperLibrary.isObject(this.dataScope.filter))
+      this.dataScope.filter = {
+        schedule: {},
+        creation: {}
+      };
+    if (!helperLibrary.isObject(this.dataScope.sort))
+      this.dataScope.sort = {};
+  }
   /** @type {import("./types").ViewModel.Private.nextPage} */
   function nextPage() {
     if (typeof this.maxPageItems === 'undefined')

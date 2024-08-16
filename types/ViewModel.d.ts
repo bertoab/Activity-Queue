@@ -264,6 +264,13 @@ export declare namespace ViewModel {
      * results.
      */
     /**
+     * Assert that all currently supported "ActivityScope"
+     * properties are defined at least sufficiently
+     * enough for dependent functions to execute.
+     * Not designed for use as a standalone user function.
+     */
+    function assertValidScope(this: StateContainer): void;
+    /**
      * Attempt to update pagination properties
      * of "this" to the next page.
      */
