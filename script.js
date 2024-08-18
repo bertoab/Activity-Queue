@@ -513,7 +513,7 @@ const ViewModel  = (argumentModel) => (function (m) {
           hourInput = 0; // account for "hourOffset" to mitigate weird behavior for "12PM" and "12AM"
         const calculatedHour = hourOffset + hourInput;
         const minuteInput = Number.parseInt(input.substring(2, 4));
-        if (hourInput < 1 || hourInput > 12 ||
+        if (hourInput < 0 || hourInput > 12 ||
             calculatedHour > 23 || minuteInput >= 60)
           throw new Error("cannot parse values in input string");
         schedule = {
