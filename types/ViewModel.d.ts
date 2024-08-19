@@ -299,6 +299,12 @@ export declare namespace ViewModel {
      * "assertValidScope" user fn.
      */
     function setScopeFilterScheduleAfter(this: StateContainer, scheduleInput: string): void;
+    /**
+     * Toggle the "dataScope.filter.schedule.includeMatch"
+     * property of the bound StateContainer. Depends on
+     * "assertValidScope" user fn.
+     */
+    function toggleScopeFilterScheduleMatch(this: StateContainer): void;
 
     // Generate State/DOMContext objects
     /**
