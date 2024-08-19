@@ -727,6 +727,14 @@ const ViewModel  = (argumentModel) => (function (m) {
     this.dataScope.filter.schedule.includeMatch = newValue;
     updateState();
   }
+  /** @type {import("./types").ViewModel.Private.toggleScopeFilterCheckedOff} */
+  function toggleScopeFilterCheckedOff() {
+    assertValidScope.call(this);
+    const currValue = this.dataScope.filter.checked_off;
+    const newValue = currValue === true ? false : true;
+    this.dataScope.filter.checked_off = newValue;
+    updateState();
+  }
   // Generate State/DOMContext objects
   /** @type {import("./types").ViewModel.Private.createItemMappingFromContainerData} */
   function createItemMappingFromContainerData(data) {
@@ -866,6 +874,7 @@ const ViewModel  = (argumentModel) => (function (m) {
       "FB": setScopeFilterScheduleBefore.bind(stateContainer),
       "FA": setScopeFilterScheduleAfter.bind(stateContainer),
       "FM": toggleScopeFilterScheduleIncludeMatch.bind(stateContainer),
+      "FC": toggleScopeFilterCheckedOff.bind(stateContainer),
       "A": addActivity,
       "T": toggleActivityCheckedOff,
       "CHENV": toggleActivitiesStorageEnvironment,

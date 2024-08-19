@@ -305,6 +305,12 @@ export declare namespace ViewModel {
      * "assertValidScope" user fn.
      */
     function toggleScopeFilterScheduleMatch(this: StateContainer): void;
+    /**
+     * Toggle the "dataScope.filter.checked_off"
+     * property of the bound StateContainer. Depends on
+     * "assertValidScope" user fn.
+     */
+    function toggleScopeFilterCheckedOff(this: StateContainer): void;
 
     // Generate State/DOMContext objects
     /**
