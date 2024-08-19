@@ -889,7 +889,7 @@ const ViewModel  = (argumentModel) => (function (m) {
           "2": () => alert("You selected: View history"),
           "3": () => alert("You selected: View archived"),
           "4": () => updateState({
-            content: [ createActivitiesTableStateContainer() ]
+            content: [ createActivitiesTableStateContainer({ sort: { scheduleAscending: true } }) ]
           })
         },
         isLiteralData: true,
