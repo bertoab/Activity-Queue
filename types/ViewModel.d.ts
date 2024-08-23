@@ -311,6 +311,12 @@ export declare namespace ViewModel {
      * "assertValidScope" user fn.
      */
     function toggleScopeFilterCheckedOff(this: StateContainer): void;
+    /**
+     * Toggle the "dataScope.sort.scheduleAscending"
+     * property of the bound StateContainer. Depends on
+     * "assertValidScope" user fn.
+     */
+    function toggleScopeSortAscendingOrder(this: StateContainer): void;
 
     // Generate State/DOMContext objects
     /**
