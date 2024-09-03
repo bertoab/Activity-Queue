@@ -371,6 +371,22 @@ export declare namespace ViewModel {
      * Applies default Container configurations.
      */
     function createActivitiesTableStateContainer(initialScope?: Model.ActivityScope): TableStateContainer;
+    /**
+     * Generate a TableStateContainer based on Activity
+     * data. Fetches Activities that are scheduled
+     * on or before the current system day AND that
+     * have a "false" value for "checked_off" property.
+     */
+    function createToCurrentDateUncheckedActivitiesTableStateContainer(): TableStateContainer;
+    /**
+     * Generate a TableStateContainer based on Activity
+     * data. Fetches Activities that are scheduled
+     * after the current system day AND that have
+     * a "false" value for "checked_off" property.
+     * Sorted with soonest scheduled Activity at
+     * top-most line.
+     */
+    function createFutureUncheckedActivitiesTableStateContainer(): TableStateContainer;
   }
   /**
    * Check for "Enter" keypress, then trim and split

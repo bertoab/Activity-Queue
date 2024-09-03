@@ -892,6 +892,42 @@ const ViewModel  = (argumentModel) => (function (m) {
     };
     return stateContainer;
   }
+  /** @type {import("./types").ViewModel.Private.createToCurrentDateUncheckedActivitiesTableStateContainer} */
+  function createToCurrentDateUncheckedActivitiesTableStateContainer() {
+    const today = new Date();
+    const scope = {
+      filter: {
+        schedule: {
+          before: {
+            year: today.getFullYear(),
+            month: today.getMonth() + 1,
+            day: today.getDate() + 1
+          },
+        },
+        checked_off: false
+      }
+    };
+    return createActivitiesTableStateContainer(scope);
+  }
+  /** @type {import("./types").ViewModel.Private.createFutureUncheckedActivitiesTableStateContainer} */
+  function createFutureUncheckedActivitiesTableStateContainer() {
+    const today = new Date();
+    const scope = {
+      filter: {
+        schedule: {
+          after: {
+            year: today.getFullYear(),
+            month: today.getMonth() + 1,
+            day: today.getDate() + 1
+          },
+          includeMatch: true,
+        },
+        checked_off: false
+      },
+      sort: { scheduleAscending: true }
+    };
+    return createActivitiesTableStateContainer(scope);
+  }
   // Hard-coded State/DOMContext objects
   const mainMenu = {
     State: {
