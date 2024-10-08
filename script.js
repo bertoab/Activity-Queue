@@ -937,13 +937,16 @@ const ViewModel  = (argumentModel) => (function (m) {
         type: "table",
         title: undefined,
         columnNames: ["Index", "Options"],
-        data: [["Add task"], ["View history"], ["View archived"], ["View All Activities"]],
+        data: [["View All Activities"], ["View Unchecked Activities Due By Today"], ["View Future Unchecked Activities"]],
         functions: {
-          "1": () => document.getElementById("modal-container").style.display = "flex",
-          "2": () => alert("You selected: View history"),
-          "3": () => alert("You selected: View archived"),
-          "4": () => updateState({
+          "1": () => updateState({
             content: [ createActivitiesTableStateContainer({ sort: { scheduleAscending: true } }) ]
+          }),
+          "2": () => updateState({
+            content: [ createToCurrentDateUncheckedActivitiesTableStateContainer() ]
+          }),
+          "3": () => updateState({
+            content: [ createFutureUncheckedActivitiesTableStateContainer() ]
           })
         },
         isLiteralData: true,
