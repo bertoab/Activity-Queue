@@ -432,6 +432,19 @@ const ViewModel  = (argumentModel) => (function (m) {
   const model = m;
   const State = {};
   const DOMContext = {};
+  // the next 3 defined constant references are used to customize and cache localization options for formatting date/time strings
+  const dateFormatOptions = {
+    weekday: "long",
+    year: "2-digit",
+    month: "numeric",
+    day: "numeric",
+  };
+  const dateFormat = new Intl.DateTimeFormat(undefined, dateFormatOptions);
+  const dateTimeFormat = new Intl.DateTimeFormat(undefined, Object.assign({
+    hour12: true,
+    hour: "numeric",
+    minute: "numeric"
+  }, dateFormatOptions));
   let updateView;
   // Manage application State/DOMContext
   /** @type {import("./types").ViewModel.Private.useFunctionState} */
@@ -588,7 +601,12 @@ const ViewModel  = (argumentModel) => (function (m) {
         value = new Date(value).toDateString();
         break;
       case "schedule":
-        value = model.dateFromSchedule(value).toDateString();
+        const date = model.dateFromSchedule(value);
+        if (typeof value.hour !== 'undefined' && typeof value.minute !== 'undefined') {
+          value = dateTimeFormat.format(date);
+        } else {
+          value = dateFormat.format(date);
+        }
         break;
       default:
         throw new Error("unknown Activity property");
