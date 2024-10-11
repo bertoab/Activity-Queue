@@ -585,7 +585,7 @@ const ViewModel  = (argumentModel) => (function (m) {
         };
         if (isTimeSpecified) {
           schedule.hour = now.getHours();
-          schedule.minutes = now.getMinutes();
+          schedule.minute = now.getMinutes();
         }
       }
     }
