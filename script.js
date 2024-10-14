@@ -529,10 +529,16 @@ const ViewModel  = (argumentModel) => (function (m) {
         if (hourInput < 0 || hourInput > 12 ||
             calculatedHour > 23 || minuteInput >= 60)
           throw new Error("cannot parse values in input string");
+        let target = new Date(now);
+        target.setHours(calculatedHour);
+        target.setMinutes(minuteInput);
+        if (target.getTime() < now.getTime()) { // if entered time already past for today, select following day
+          target.setDate(target.getDate() + 1);
+        }
         schedule = {
-          day: now.getDate(),
-          month: now.getMonth() + 1,
-          year: now.getFullYear(),
+          day: target.getDate(),
+          month: target.getMonth() + 1,
+          year: target.getFullYear(),
           hour: calculatedHour,
           minute: minuteInput
         };
