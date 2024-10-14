@@ -608,7 +608,7 @@ const ViewModel  = (argumentModel) => (function (m) {
         break;
       case "schedule":
         const date = model.dateFromSchedule(value);
-        if (typeof value.hour !== 'undefined' && typeof value.minute !== 'undefined') {
+        if (typeof value !== 'undefined' && typeof value.hour !== 'undefined' && typeof value.minute !== 'undefined') {
           value = dateTimeFormat.format(date);
         } else {
           value = dateFormat.format(date);
