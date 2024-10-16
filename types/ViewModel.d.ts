@@ -240,13 +240,6 @@ export declare namespace ViewModel {
      */
     function removeActivity(itemInput: string): void;
     /**
-     * Duplicate an Activity. Change the created
-     * Activity's "schedule" property to the
-     * current system date and set its "origin"
-     * property.
-     */
-    function copyActivityIntoToday(itemInput: string): void;
-    /**
      * Toggle the "checked_off" property of an Activity.
      * The Activity must have a reference (its "id"
      * property) within "State.itemMapping". If the
@@ -255,6 +248,13 @@ export declare namespace ViewModel {
      * applied.
      */
     function toggleActivityCheckedOff(itemInput: string): void;
+    /**
+     * Duplicate an Activity. Change the created
+     * Activity's "schedule" property to the
+     * current system date and set its "origin"
+     * property.
+     */
+    function copyActivityIntoToday(itemInput: string): void;
 
     // User functions (bound to StateContainer)
     /**
