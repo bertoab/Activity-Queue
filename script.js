@@ -677,6 +677,14 @@ const ViewModel  = (argumentModel) => (function (m) {
     model.duplicateActivity(id, { schedule: todaySchedule, origin: id });
     updateState();
   }
+  function updateActivitySchedule(itemInput, dateTimeInput) {
+    const id = State.itemMapping[itemInput];
+    const newSchedule = parseDateTime(dateTimeInput);
+    model.updateActivity(id, {
+      schedule: newSchedule
+    });
+    updateState();
+  }
   // User functions (bound to StateContainer)
   /** @type {import("./types").ViewModel.Private.assertValidScope} */
   function assertValidScope() {
@@ -912,7 +920,8 @@ const ViewModel  = (argumentModel) => (function (m) {
       "T": toggleActivityCheckedOff,
       "CHENV": toggleActivitiesStorageEnvironment,
       "D": removeActivity,
-      "C": copyActivityIntoToday
+      "C": copyActivityIntoToday,
+      "ES": updateActivitySchedule
     };
     return stateContainer;
   }

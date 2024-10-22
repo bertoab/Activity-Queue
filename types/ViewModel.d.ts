@@ -255,6 +255,12 @@ export declare namespace ViewModel {
      * property.
      */
     function copyActivityIntoToday(itemInput: string): void;
+    /**
+     * Update an existing Activity's schedule. Select
+     * an existing Activity based on "itemInput", a
+     * a reference within "State.itemMapping".
+     */
+    function updateActivitySchedule(itemInput: string, dateTimeInput: string): void;
 
     // User functions (bound to StateContainer)
     /**
